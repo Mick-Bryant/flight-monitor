@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .navbar { background-color: #1a73e8 !important; }
+    .navbar-brand, .nav-link { color: #fff !important; }
+    .nav-link:hover { color: #cce0ff !important; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .card-header { border-radius: 12px 12px 0 0 !important; }
+    .btn-primary { background-color: #1a73e8; border-color: #1a73e8; }
+    .btn-primary:hover { background-color: #1558b0; border-color: #1558b0; }
+    .price-drop { color: #188038; font-weight: bold; }
+    .price-rise { color: #d93025; }
+    footer { color: #999; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<nav class="navbar navbar-expand-lg mb-4">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{{ url_for('main.dashboard') }}">
+      <i class="bi bi-airplane"></i> {{ app_name }}
+    </a>
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('main.add_route') }}">
+            <i class="bi bi-plus-circle"></i> Add Route
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('main.rtw_list') }}">
+            <i class="bi bi-globe2"></i> RTW
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('main.profile') }}">
+            <i class="bi bi-person-circle"></i> Profile
+          </a>
+        </li>
+        {% if current_user.is_admin %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#"
+             data-bs-toggle="dropdown">
+            <i class="bi bi-shield-check"></i> Admin
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{{ url_for('main.admin') }}">
+                <i class="bi bi-speedometer2"></i> Admin Dashboard
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('main.admin_invites') }}">
+                <i class="bi bi-envelope-plus"></i> Invitations
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('main.admin_airports') }}">
+                <i class="bi bi-geo-alt"></i> Manage Airports
+              </a>
+            </li>
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <span class="nav-link text-white-50">
+            <i class="bi bi-person"></i> {{ current_user.name }}
+          </span>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('main.upgrade') }}">
+            {% if current_user.is_admin %}
+              <span class="badge bg-danger">Admin</span>
+            {% elif current_user.is_trial() %}
+              <span class="badge bg-info text-dark">
+                Trial — {{ current_user.trial_days_remaining() }}d
+              </span>
+            {% elif current_user.subscription_tier == "explorer" %}
+              <span class="badge bg-primary">Explorer</span>
+            {% elif current_user.subscription_tier == "traveller" %}
+              <span class="badge bg-success">Traveller</span>
+            {% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('auth.logout') }}">
+            <i class="bi bi-box-arrow-in-right"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<div class="container mb-5">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+<footer class="text-center py-4">
+  {{ app_name }} &copy; {{ 2026 }} &mdash; Prices sourced from Duffel API.
+  Always confirm before booking.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

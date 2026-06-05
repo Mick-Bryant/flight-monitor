@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}RTW Itineraries — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3><i class="bi bi-globe2"></i> Around The World Itineraries</h3>
+  <a href="{{ url_for('main.rtw_add') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle"></i> Add Itinerary
+  </a>
+</div>
+
+{% if itineraries %}
+  {% for itin in itineraries %}
+  <div class="card mb-3 {{ 'opacity-50' if not itin.is_active }}">
+    <div class="card-body">
+      <div class="row align-items-center">
+
+        <div class="col-md-4">
+          <h5 class="mb-1">
+            <i class="bi bi-globe2"></i> {{ itin.name }}
+          </h5>
+          <small class="text-muted">
+            {{ itin.legs|length }} legs &mdash;
+            {% for leg in itin.legs %}
+              {{ leg.origin }}{% if not loop.last %}→{% endif %}
+            {% endfor %}
+            → {{ itin.legs[-1].destination }}
+          </small>
+        </div>
+
+        <div class="col-md-3">
+          {% set priced_legs = itin.legs|selectattr("last_price")|list %}
+          {% set all_priced = priced_legs|length == itin.legs|list|length %}
+          {% if itin.last_total and all_priced %}
+            <div class="fw-bold fs-5">
+              {{ format_price(convert(itin.last_total,
+                 itin.last_currency, currency), currency) }}
+            </div>
+            {% if itin.baseline_total and itin.last_total < itin.baseline_total %}
+              <small class="price-drop">
+                <i class="bi bi-arrow-down-circle"></i>
+                Down {{ format_price(convert(
+                  itin.baseline_total - itin.last_total,
+                  itin.last_currency, currency), currency) }}
+              </small>
+            {% elif itin.baseline_total %}
+              <small class="text-muted">
+                Baseline {{ format_price(convert(itin.baseline_total,
+                  itin.last_currency, currency), currency) }}
+              </small>
+            {% endif %}
+          {% elif itin.last_total and not all_priced %}
+            <span class="text-muted small">
+              <i class="bi bi-hourglass"></i>
+              Waiting for all legs
+            </span>
+          {% else %}
+            <span class="text-muted">Not checked yet</span>
+          {% endif %}
+        </div>
+
+        <div class="col-md-2">
+          <small class="text-muted">
+            {% if itin.last_checked %}
+              <i class="bi bi-clock"></i>
+              {{ itin.last_checked.strftime("%d %b %H:%M") }}
+            {% else %}
+              Pending first check
+            {% endif %}
+          </small>
+        </div>
+
+        <div class="col-md-3 text-end">
+          <a href="{{ url_for('main.rtw_detail', itinerary_id=itin.id) }}"
+             class="btn btn-sm btn-outline-secondary mb-1 w-100">
+            <i class="bi bi-list-ul"></i> Detail
+          </a>
+          <form method="POST"
+                action="{{ url_for('main.rtw_toggle', itinerary_id=itin.id) }}">
+            <button class="btn btn-sm btn-outline-warning mb-1 w-100">
+              {% if itin.is_active %}
+                <i class="bi bi-pause-circle"></i> Pause
+              {% else %}
+                <i class="bi bi-play-circle"></i> Resume
+              {% endif %}
+            </button>
+          </form>
+          <form method="POST"
+                action="{{ url_for('main.rtw_delete', itinerary_id=itin.id) }}"
+                onsubmit="return confirm('Delete this itinerary?')">
+            <button class="btn btn-sm btn-outline-danger w-100">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-globe2 text-muted" style="font-size:3rem"></i>
+      <h5 class="mt-3 text-muted">No RTW itineraries yet</h5>
+      <p class="text-muted">
+        Build a multi-leg Around The World journey and monitor
+        the combined price.
+      </p>
+      <a href="{{ url_for('main.rtw_add') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Your First Itinerary
+      </a>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

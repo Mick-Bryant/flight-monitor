@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Create Account — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card mt-5">
+      <div class="card-header bg-primary text-white text-center py-3">
+        <h4 class="mb-0"><i class="bi bi-airplane"></i> {{ app_name }}</h4>
+      </div>
+      <div class="card-body p-4">
+        <h5 class="mb-1 text-center">Create your account</h5>
+        {% if invite and invite.email %}
+          <p class="text-center text-muted small mb-4">
+            Invited for {{ invite.email }}
+          </p>
+        {% else %}
+          <p class="text-center text-muted small mb-4">
+            You have been invited to join {{ app_name }}
+          </p>
+        {% endif %}
+
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Full name</label>
+            <input type="text" name="name" class="form-control"
+                   placeholder="Your name" required autofocus>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email address</label>
+            <input type="email" name="email" class="form-control"
+                   value="{{ invite.email or '' }}"
+                   placeholder="you@example.com" required
+                   {{ 'readonly' if invite and invite.email }}>
+            {% if invite and invite.email %}
+              <div class="form-text">
+                This invite is for {{ invite.email }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control"
+                   placeholder="At least 8 characters" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm password</label>
+            <input type="password" name="confirm" class="form-control"
+                   placeholder="Repeat your password" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-person-plus"></i> Create Account
+          </button>
+        </form>
+      </div>
+      <div class="card-footer text-center py-3">
+        Already have an account?
+        <a href="{{ url_for('auth.login') }}">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

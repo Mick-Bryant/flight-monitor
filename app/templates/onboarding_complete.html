@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}You're all set — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 text-center py-5">
+
+    <div style="font-size:4rem;margin-bottom:16px">✈️</div>
+
+    <h2 class="fw-bold mb-3">You're all set!</h2>
+
+    <p class="text-muted mb-4" style="font-size:1.1rem">
+      {{ app_name }} is now watching your route around the clock.
+      You'll get an email the moment a significant deal appears.
+    </p>
+
+    <div class="card bg-light border-0 mb-4 text-start">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-3">What happens next:</h6>
+        <div class="d-flex gap-3 mb-2">
+          <i class="bi bi-clock text-primary mt-1"></i>
+          <span class="small">
+            <strong>First check runs within the hour.</strong>
+            Your baseline price will be set automatically.
+          </span>
+        </div>
+        <div class="d-flex gap-3 mb-2">
+          <i class="bi bi-bell text-primary mt-1"></i>
+          <span class="small">
+            <strong>Alerts fire when prices drop.</strong>
+            You'll get an email with the best options across
+            all carriers.
+          </span>
+        </div>
+        <div class="d-flex gap-3 mb-0">
+          <i class="bi bi-envelope text-primary mt-1"></i>
+          <span class="small">
+            <strong>Weekly summary every Monday.</strong>
+            A roundup of price movements even when no alerts fired.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{{ url_for('main.dashboard') }}"
+         class="btn btn-primary px-4">
+        <i class="bi bi-speedometer2"></i> Go to Dashboard
+      </a>
+      <a href="{{ url_for('main.add_route') }}"
+         class="btn btn-outline-primary px-4">
+        <i class="bi bi-plus-circle"></i> Add Another Route
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

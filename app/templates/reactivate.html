@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Reactivate Account — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+
+    <h3 class="mb-4">
+      <i class="bi bi-arrow-repeat"></i> Reactivate Your Account
+    </h3>
+
+    <div class="alert alert-info mb-4">
+      <i class="bi bi-info-circle"></i>
+      Your routes and alert history have been preserved.
+      Choose a plan to resume monitoring immediately.
+    </div>
+
+    {% if not eligible_for_trial %}
+    <div class="alert alert-warning mb-4">
+      <i class="bi bi-exclamation-circle"></i>
+      Free trials are one per account. Please select a paid plan to continue.
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+
+      <!-- Explorer -->
+      <div class="col-md-6">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header text-center bg-light py-3">
+            <h5 class="mb-0">Explorer</h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                5 routes, 2 RTW itineraries
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Price checks every 2 hours
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Weekly summary
+              </li>
+            </ul>
+          </div>
+          <div class="card-footer bg-transparent">
+            <div class="d-grid gap-2">
+              <form method="POST"
+                    action="{{ url_for('main.reactivate_account') }}">
+                <input type="hidden" name="tier" value="explorer">
+                <input type="hidden" name="billing" value="monthly">
+                <button class="btn btn-outline-primary w-100">
+                  Explorer Monthly
+                  <strong>AUD $8/mo</strong>
+                </button>
+              </form>
+              <form method="POST"
+                    action="{{ url_for('main.reactivate_account') }}">
+                <input type="hidden" name="tier" value="explorer">
+                <input type="hidden" name="billing" value="annual">
+                <button class="btn btn-outline-primary w-100">
+                  Explorer Annual
+                  <strong>AUD $80/yr</strong>
+                  <span class="badge bg-success ms-1"
+                        style="font-size:10px">
+                    2 months free
+                  </span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Traveller -->
+      <div class="col-md-6">
+        <div class="card h-100 shadow-sm border-primary">
+          <div class="card-header text-center py-3"
+               style="background:#1a73e8">
+            <h5 class="mb-0 text-white">
+              Traveller
+              <span class="badge bg-warning text-dark ms-2"
+                    style="font-size:11px">Best Value</span>
+            </h5>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                20 routes, 20 RTW itineraries
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Price checks every hour
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Up to 4 alert recipients
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Full weekly summary + recommendations
+              </li>
+            </ul>
+          </div>
+          <div class="card-footer bg-transparent">
+            <div class="d-grid gap-2">
+              <form method="POST"
+                    action="{{ url_for('main.reactivate_account') }}">
+                <input type="hidden" name="tier" value="traveller">
+                <input type="hidden" name="billing" value="monthly">
+                <button class="btn btn-primary w-100">
+                  Traveller Monthly
+                  <strong>AUD $20/mo</strong>
+                </button>
+              </form>
+              <form method="POST"
+                    action="{{ url_for('main.reactivate_account') }}">
+                <input type="hidden" name="tier" value="traveller">
+                <input type="hidden" name="billing" value="annual">
+                <button class="btn btn-primary w-100">
+                  Traveller Annual
+                  <strong>AUD $192/yr</strong>
+                  <span class="badge bg-warning text-dark ms-1"
+                        style="font-size:10px">
+                    2 months free
+                  </span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="text-center text-muted small mt-4">
+      Payment processing via Stripe will be available shortly.
+      Contact us to reactivate manually in the meantime.
+    </p>
+
+  </div>
+</div>
+{% endblock %}

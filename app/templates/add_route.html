@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+{% block title %}Add Route — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <h3 class="mb-4"><i class="bi bi-plus-circle"></i> Add a Flight Route</h3>
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="POST">
+
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">From</label>
+              <input type="text" id="origin_display" class="form-control"
+                     placeholder="Type city or airport..." autocomplete="off">
+              <input type="hidden" name="origin" id="origin_code" required>
+              <div id="origin_results" class="list-group mt-1 position-absolute"
+                   style="z-index:1000;width:calc(50% - 2rem)"></div>
+            </div>
+            <div class="col">
+              <label class="form-label">To</label>
+              <input type="text" id="destination_display" class="form-control"
+                     placeholder="Type city or airport..." autocomplete="off">
+              <input type="hidden" name="destination" id="destination_code" required>
+              <div id="destination_results" class="list-group mt-1 position-absolute"
+                   style="z-index:1000;width:calc(50% - 2rem)"></div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">Departure date</label>
+              <input type="date" name="departure_date"
+                     class="form-control" required>
+            </div>
+            <div class="col">
+              <label class="form-label">
+                Return date <span class="text-muted">(optional)</span>
+              </label>
+              <input type="date" name="return_date" class="form-control">
+              <div class="form-text">Leave blank for one-way</div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">Adults</label>
+              <select name="adults" class="form-select">
+                {% for i in range(1, 7) %}
+                  <option value="{{ i }}"
+                    {{ 'selected' if i == 1 }}>{{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col">
+              <label class="form-label">Cabin class</label>
+              <select name="cabin_class" class="form-select">
+                <option value="economy">Economy</option>
+                <option value="premium_economy">Premium Economy</option>
+                <option value="business">Business</option>
+                <option value="first">First</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" id="threshold_label">
+              Price drop alert — minimum saving to trigger an alert
+              <span class="text-muted small" id="threshold_context">
+                — select airports above to auto-fill
+              </span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text" id="threshold_currency">
+                {{ current_user.preferred_currency }}
+              </span>
+              <input type="number" name="threshold_usd" id="threshold_input"
+                     class="form-control" value="" min="50"
+                     max="10000" step="50"
+                     placeholder="Auto-filled when airports selected">
+            </div>
+            <div class="form-text" id="threshold_hint" style="display:none">
+              Only alert me when the price drops by at least this amount.
+              Change this to override your profile default for this route only.
+            </div>
+          </div>
+
+          <!-- Flexible dates -->
+          <div class="mb-4">
+            <div class="form-check">
+              <input type="checkbox" name="flexible_dates"
+                     class="form-check-input" id="flexible_dates"
+                     onchange="toggleFlexDates(this)">
+              <label class="form-check-label" for="flexible_dates">
+                <strong>Flexible dates</strong>
+                <span class="text-muted small">
+                  — check dates either side of both departure and return
+                </span>
+              </label>
+            </div>
+
+            <div id="flex_dates_section" style="display:none"
+                 class="mt-3 ms-4 p-3 bg-light rounded">
+              <div class="row g-3 align-items-end">
+                <div class="col-auto">
+                  <label class="form-label small fw-bold">
+                    Check either side by
+                  </label>
+                </div>
+                <div class="col-auto">
+                  <select name="flex_period_type" id="flex_period_type"
+                          class="form-select form-select-sm"
+                          onchange="updateFlexRange()">
+                    <option value="weeks">Weeks</option>
+                    <option value="days">Days</option>
+                  </select>
+                </div>
+                <div class="col-auto">
+                  <select name="flex_period_value" id="flex_period_value"
+                          class="form-select form-select-sm">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                </div>
+                <div class="col-auto">
+                  <span class="text-muted small" id="flex_range_label">
+                    of each date
+                  </span>
+                </div>
+              </div>
+
+              <div class="form-check mt-3">
+                <input type="checkbox" name="flex_duration"
+                       class="form-check-input" id="flex_duration">
+                <label class="form-check-label small" for="flex_duration">
+                  <strong>Flexible duration</strong> — vary trip length by
+                  <select name="flex_duration_days"
+                          class="form-select form-select-sm d-inline-block"
+                          style="width:auto">
+                    <option value="3">±3 days</option>
+                    <option value="7" selected>±7 days</option>
+                    <option value="14">±14 days</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nearby airports -->
+          <div class="mb-4">
+            <div class="form-check">
+              <input type="checkbox" name="nearby_airports"
+                     class="form-check-input" id="nearby_airports"
+                     onchange="toggleNearbySaving(this)">
+              <label class="form-check-label" for="nearby_airports">
+                <strong>Include nearby airports</strong>
+                <span class="text-muted small">
+                  — also check airports within 100km
+                </span>
+              </label>
+            </div>
+            <div id="nearby_saving_section" style="display:none"
+                 class="mt-2 ms-4">
+              <label class="form-label small">
+                Minimum saving to alert
+                <span class="text-muted">(vs your selected airport)</span>
+              </label>
+              <div class="input-group" style="max-width:200px">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="nearby_min_saving"
+                       class="form-control" value="200"
+                       min="50" max="2000" step="50">
+              </div>
+            </div>
+          </div>
+
+          {% if current_user.can_optimize() %}
+          <!-- Per-route optimize override (Traveller) -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              <i class="bi bi-speedometer2"></i> Alert mode for this route
+            </label>
+            <select name="optimize_for" class="form-select"
+                    style="max-width:340px">
+              <option value="">
+                Use profile default
+                ({% if current_user.optimize_for == 'fastest' %}Fastest
+                {% elif current_user.optimize_for == 'best_value' %}Best Value
+                {% else %}Cheapest{% endif %})
+              </option>
+              <option value="cheapest">Cheapest — lowest price</option>
+              <option value="fastest">Fastest — shortest journey time</option>
+              <option value="best_value">
+                Best Value — price + time + stops
+              </option>
+            </select>
+            <div class="form-text">
+              Overrides your profile default for this route only.
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary"
+                    onclick="return validateAirports()">
+              <i class="bi bi-plus-circle"></i> Start Monitoring
+            </button>
+            <a href="{{ url_for('main.dashboard') }}"
+               class="btn btn-outline-secondary">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setupAirportSearch(inputId, resultsId, hiddenId) {
+  const input   = document.getElementById(inputId);
+  const results = document.getElementById(resultsId);
+  const hidden  = document.getElementById(hiddenId);
+  let timer;
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    const term = this.value.trim();
+    hidden.value = "";
+
+    if (term.length < 2) { results.innerHTML = ""; return; }
+
+    timer = setTimeout(() => {
+      fetch(`/api/airports?q=${encodeURIComponent(term)}`)
+        .then(r => r.json())
+        .then(airports => {
+          results.innerHTML = "";
+          if (airports.length === 0) {
+            results.innerHTML = `<div class="list-group-item text-muted">
+              No airports found</div>`;
+            return;
+          }
+          airports.forEach(airport => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "list-group-item list-group-item-action";
+            item.innerHTML = `
+              <strong>${airport.city} (${airport.iata})</strong>
+              <small class="text-muted d-block">${airport.display}</small>
+              ${airport.region
+                ? `<small class="badge bg-light text-dark border">
+                     ${airport.region}
+                   </small>`
+                : ''}`;
+            item.addEventListener('click', function() {
+              input.value  = `${airport.city} (${airport.iata})`;
+              hidden.value = airport.iata;
+              results.innerHTML = "";
+              updateThreshold();
+            });
+            results.appendChild(item);
+          });
+        });
+    }, 300);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target)) results.innerHTML = "";
+  });
+}
+
+function updateThreshold() {
+  const origin = document.getElementById('origin_code').value;
+  const dest   = document.getElementById('destination_code').value;
+  if (!origin || !dest) return;
+
+  fetch(`/api/routes/threshold?origin=${origin}&destination=${dest}`)
+    .then(r => r.json())
+    .then(data => {
+      // Update the threshold value
+      document.getElementById('threshold_input').value = data.threshold;
+      document.getElementById('threshold_currency').textContent = data.currency;
+
+      // Update the label inline — right where the user is looking
+      const routeLabel = data.route_type.charAt(0).toUpperCase()
+                       + data.route_type.slice(1);
+      document.getElementById('threshold_context').textContent =
+        ` — ${routeLabel} route · your ${data.region_label} default`;
+
+      // Show the override hint below the field
+      document.getElementById('threshold_hint').style.display = 'block';
+    });
+}
+
+function validateAirports() {
+  const origin = document.getElementById('origin_code').value;
+  const dest   = document.getElementById('destination_code').value;
+  if (!origin || !dest) {
+    alert('Please select both a departure and arrival airport.');
+    return false;
+  }
+  if (origin === dest) {
+    alert('Departure and arrival airports cannot be the same.');
+    return false;
+  }
+  return true;
+}
+
+setupAirportSearch('origin_display', 'origin_results', 'origin_code');
+setupAirportSearch('destination_display', 'destination_results', 'destination_code');
+
+// Date constraints
+const depInput = document.querySelector('input[name="departure_date"]');
+const retInput = document.querySelector('input[name="return_date"]');
+const today    = new Date().toISOString().split('T')[0];
+depInput.min   = today;
+depInput.addEventListener('change', function() {
+  if (this.value) {
+    retInput.min = this.value;
+    if (retInput.value && retInput.value < this.value) {
+      retInput.value = '';
+    }
+  }
+});
+
+function toggleNearbySaving(checkbox) {
+  const section = document.getElementById('nearby_saving_section');
+  section.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+function toggleFlexDates(checkbox) {
+  const section = document.getElementById('flex_dates_section');
+  section.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+function updateFlexRange() {
+  const type    = document.getElementById('flex_period_type').value;
+  const select  = document.getElementById('flex_period_value');
+  const label   = document.getElementById('flex_range_label');
+
+  // Rebuild options based on type
+  select.innerHTML = '';
+  if (type === 'weeks') {
+    [1, 2, 3, 4].forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.text  = v;
+      if (v === 2) opt.selected = true;
+      select.appendChild(opt);
+    });
+    label.textContent = 'week(s) either side of each date';
+  } else {
+    for (let v = 1; v <= 30; v++) {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.text  = v;
+      if (v === 14) opt.selected = true;
+      select.appendChild(opt);
+    }
+    label.textContent = 'day(s) either side of each date';
+  }
+}
+</script>
+{% endblock %}

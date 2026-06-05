@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+{% block title %}Profile — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+
+    <h3 class="mb-4"><i class="bi bi-person-circle"></i> Your Profile</h3>
+
+    <!-- Personal details -->
+    <div class="card mb-4">
+      <div class="card-header fw-bold">Personal Details</div>
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('main.profile') }}">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Full name</label>
+              <input type="text" name="name" class="form-control"
+                     value="{{ current_user.name }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Preferred currency</label>
+              <select name="preferred_currency" class="form-select">
+                {% for code, label in currencies %}
+                  <option value="{{ code }}"
+                    {{ 'selected' if current_user.preferred_currency == code }}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
+              <div class="form-text">
+                Prices and alerts will be shown in this currency.
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Login email</label>
+            <input type="email" class="form-control"
+                   value="{{ current_user.email }}" disabled>
+            <div class="form-text">
+              Your login email cannot be changed here.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">
+              Alert email <span class="text-muted">(optional)</span>
+            </label>
+            <input type="email" name="alert_email" class="form-control"
+                   value="{{ current_user.alert_email or '' }}"
+                   placeholder="Leave blank to use your login email">
+            <div class="form-text">
+              Price drop alerts will be sent to:
+              <strong>{{ current_user.get_alert_email() }}</strong>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Save Details
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Airline memberships -->
+    <div class="card mb-4">
+      <div class="card-header fw-bold">
+        <i class="bi bi-airplane-engines"></i> Airline Memberships
+        <span class="text-muted fw-normal ms-2 small">
+          Your member airlines are highlighted in price alerts
+        </span>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('main.profile') }}">
+          <input type="hidden" name="name"
+                 value="{{ current_user.name }}">
+          <input type="hidden" name="alert_email"
+                 value="{{ current_user.alert_email or '' }}">
+          <input type="hidden" name="preferred_currency"
+                 value="{{ current_user.preferred_currency }}">
+          <p class="text-muted small mb-3">
+            Select the airlines where you hold a frequent flyer
+            or loyalty membership. These will be highlighted
+            in your price alert emails.
+          </p>
+          <div class="row g-2">
+            {% for airline in airlines %}
+            <div class="col-md-4 col-6">
+              <div class="form-check">
+                <input type="checkbox" name="memberships"
+                       class="form-check-input"
+                       id="airline_{{ loop.index }}"
+                       value="{{ airline }}"
+                       {{ 'checked' if airline in current_user.get_memberships() }}>
+                <label class="form-check-label small"
+                       for="airline_{{ loop.index }}">
+                  {{ airline }}
+                </label>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary mt-4">
+            <i class="bi bi-save"></i> Save Memberships
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Alert thresholds -->
+    <div class="card mb-4">
+      <div class="card-header fw-bold">
+        <i class="bi bi-bell"></i> Price Drop Alerts
+        <span class="text-muted fw-normal ms-2 small">
+          Minimum price drop required to send you an alert
+        </span>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('main.save_thresholds') }}">
+          <p class="text-muted small mb-4">
+            These are your default minimum savings by route type. When you
+            add a route the correct amount is applied automatically based
+            on the airports you select. You will only be alerted when the
+            price drops by at least this amount. You can change this for
+            any individual route without affecting these defaults.
+          </p>
+
+          <!-- Domestic -->
+          <h6 class="text-muted mb-3 mt-2">
+            <i class="bi bi-house"></i> Domestic Routes
+          </h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">
+                Domestic
+                <span class="text-muted small">
+                  (departure and arrival in same country)
+                </span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_domestic"
+                       class="form-control"
+                       value="{{ current_user.threshold_domestic }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+          </div>
+
+          <!-- Regional -->
+          <h6 class="text-muted mb-3">
+            <i class="bi bi-map"></i> Regional Routes
+            <span class="fw-normal small">
+              (different countries, same region)
+            </span>
+          </h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="bi bi-water"></i> Australia / Oceania
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_oceania"
+                       class="form-control"
+                       value="{{ current_user.threshold_oceania }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="bi bi-airplane"></i> Asia
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_asia"
+                       class="form-control"
+                       value="{{ current_user.threshold_asia }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="bi bi-star"></i> Middle East
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_middle_east"
+                       class="form-control"
+                       value="{{ current_user.threshold_middle_east }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="bi bi-globe-europe-africa"></i> Europe
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_europe"
+                       class="form-control"
+                       value="{{ current_user.threshold_europe }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="bi bi-sun"></i> Africa
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_africa"
+                       class="form-control"
+                       value="{{ current_user.threshold_africa }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="bi bi-flag"></i> North America
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_north_america"
+                       class="form-control"
+                       value="{{ current_user.threshold_north_america }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="bi bi-tree"></i> South America
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_south_america"
+                       class="form-control"
+                       value="{{ current_user.threshold_south_america }}"
+                       min="50" max="5000" step="50">
+              </div>
+            </div>
+          </div>
+
+          <!-- International fallback -->
+          <h6 class="text-muted mb-3">
+            <i class="bi bi-globe2"></i> International Routes
+            <span class="fw-normal small">
+              (crossing between regions)
+            </span>
+          </h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">
+                International fallback
+                <span class="text-muted small">
+                  (used when destination region is unrecognised)
+                </span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  {{ current_user.preferred_currency }}
+                </span>
+                <input type="number" name="threshold_international"
+                       class="form-control"
+                       value="{{ current_user.threshold_international or 400 }}"
+                       min="50" max="10000" step="50">
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Save Thresholds
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Alert optimization -->
+    <div class="card mb-4">
+      <div class="card-header fw-bold">
+        <i class="bi bi-speedometer2"></i> Alert Optimization
+        {% if not current_user.can_optimize() %}
+          <span class="badge bg-success ms-2" style="font-size:0.7rem">
+            Traveller
+          </span>
+        {% endif %}
+      </div>
+      <div class="card-body p-4">
+        {% if current_user.can_optimize() %}
+          <p class="text-muted small mb-3">
+            Choose what "best" means when selecting which flight triggers an
+            alert. This default applies to all routes unless overridden
+            individually when adding a route.
+          </p>
+          <form method="POST" action="{{ url_for('main.save_optimize') }}">
+            <div class="mb-3" style="max-width:380px">
+              <label class="form-label fw-semibold">Alert me on the</label>
+              <select name="optimize_for" class="form-select">
+                <option value="cheapest"
+                  {{ 'selected' if current_user.optimize_for == 'cheapest' or not current_user.optimize_for }}>
+                  Cheapest — lowest price (default)
+                </option>
+                <option value="fastest"
+                  {{ 'selected' if current_user.optimize_for == 'fastest' }}>
+                  Fastest — shortest journey time
+                </option>
+                <option value="best_value"
+                  {{ 'selected' if current_user.optimize_for == 'best_value' }}>
+                  Best Value — balances price, time and stops
+                </option>
+              </select>
+              <div class="form-text">
+                <strong>Fastest</strong> tracks the shortest-duration flight
+                available each check. <strong>Best Value</strong> weights price
+                against journey time and number of stops.
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="bi bi-save"></i> Save
+            </button>
+          </form>
+        {% else %}
+          <div class="d-flex align-items-start gap-3">
+            <div>
+              <p class="mb-2 text-muted small">
+                Alert mode is fixed to <strong>Cheapest</strong> on your
+                current plan. Upgrade to Traveller to unlock
+                <strong>Fastest</strong> (shortest journey time) and
+                <strong>Best Value</strong> (price + time + stops) modes,
+                with per-route overrides.
+              </p>
+              <a href="{{ url_for('main.upgrade') }}"
+                 class="btn btn-outline-success btn-sm">
+                <i class="bi bi-arrow-up-circle"></i> Upgrade to Traveller
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Password change -->
+    <div class="card mb-4">
+      <div class="card-header fw-bold">Change Password</div>
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('main.change_password') }}">
+          <div class="mb-3">
+            <label class="form-label">Current password</label>
+            <input type="password" name="current_password"
+                   class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New password</label>
+            <input type="password" name="new_password"
+                   class="form-control"
+                   placeholder="At least 8 characters" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Confirm new password</label>
+            <input type="password" name="confirm_password"
+                   class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-lock"></i> Update Password
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Account info -->
+    <div class="card">
+      <div class="card-header fw-bold">Account Info</div>
+      <div class="card-body p-4">
+        <p class="mb-1">
+          <i class="bi bi-calendar"></i>
+          Member since {{ current_user.created_at.strftime("%d %B %Y") }}
+        </p>
+        <p class="mb-0">
+          <i class="bi bi-graph-up"></i>
+          Monitoring {{ current_user.routes|length }} route(s)
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Manage Subscription -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header fw-bold">
+    <i class="bi bi-credit-card"></i> Manage Subscription
+  </div>
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        {% if current_user.is_admin %}
+          <p class="mb-0">
+            <strong>Plan:</strong> Admin
+            <span class="badge bg-danger ms-2">Admin</span>
+          </p>
+        {% elif current_user.account_type == "invited" %}
+          <p class="mb-0">
+            <strong>Plan:</strong> Explorer
+            <span class="badge bg-primary ms-2">Complimentary</span>
+          </p>
+          <small class="text-muted">
+            Complimentary access — no payment required.
+          </small>
+        {% elif current_user.is_trial() %}
+          <p class="mb-0">
+            <strong>Plan:</strong> Free Trial
+            <span class="badge bg-info text-dark ms-2">
+              {{ current_user.trial_days_remaining() }} days left
+            </span>
+          </p>
+          <small class="text-muted">
+            Trial ends
+            {{ current_user.trial_expires_at.strftime("%d %B %Y")
+               if current_user.trial_expires_at else "soon" }}.
+          </small>
+        {% elif current_user.subscription_status == "cancelled" %}
+          <p class="mb-0">
+            <strong>Plan:</strong>
+            {{ current_user.tier_config()['name'] }}
+            <span class="badge bg-warning text-dark ms-2">
+              Cancelled
+            </span>
+          </p>
+          <small class="text-muted">
+            Access until
+            {{ current_user.subscription_period_end.strftime("%d %B %Y")
+               if current_user.subscription_period_end else "end of period" }}.
+          </small>
+        {% elif current_user.subscription_status == "deactivated" %}
+          <p class="mb-0">
+            <strong>Plan:</strong> Deactivated
+            <span class="badge bg-secondary ms-2">Inactive</span>
+          </p>
+        {% else %}
+          <p class="mb-0">
+            <strong>Plan:</strong>
+            {{ current_user.tier_config()['name'] }}
+            <span class="badge bg-success ms-2">Active</span>
+          </p>
+          <small class="text-muted">
+            {{ current_user.billing_period | capitalize }} billing.
+            {% if current_user.subscription_period_end %}
+              Next renewal
+              {{ current_user.subscription_period_end.strftime("%d %B %Y") }}.
+            {% endif %}
+          </small>
+        {% endif %}
+      </div>
+      <div class="col-md-6 mt-3 mt-md-0 text-md-end">
+        {% if current_user.subscription_status == "deactivated" %}
+          <a href="{{ url_for('main.reactivate') }}"
+             class="btn btn-primary btn-sm">
+            <i class="bi bi-arrow-repeat"></i> Reactivate Account
+          </a>
+        {% elif not current_user.is_admin %}
+          <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+            {% if current_user.subscription_status != "cancelled" %}
+              <a href="{{ url_for('main.upgrade') }}"
+                 class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-arrow-up-circle"></i> Upgrade
+              </a>
+              <a href="{{ url_for('main.cancel_confirm') }}"
+                 class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-x-circle"></i> Cancel Subscription
+              </a>
+            {% else %}
+              <a href="{{ url_for('main.reactivate') }}"
+                 class="btn btn-primary btn-sm">
+                <i class="bi bi-arrow-repeat"></i> Reactivate
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}

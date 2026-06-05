@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — {{ app_name }}{% endblock %}
+
+{% block content %}
+
+{% if current_user.is_trial() %}
+  {% set days_left = current_user.trial_days_remaining() %}
+  {% if days_left <= 3 %}
+    <div class="alert alert-danger d-flex justify-content-between
+                align-items-center mb-4">
+      <span>
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>Trial expires in {{ days_left }}
+        day{{ 's' if days_left != 1 }}.</strong>
+        Monitoring will pause when your trial ends.
+      </span>
+      <a href="{{ url_for('main.upgrade') }}"
+         class="btn btn-danger btn-sm">
+        Upgrade Now
+      </a>
+    </div>
+  {% elif days_left <= 10 %}
+    <div class="alert alert-warning d-flex justify-content-between
+                align-items-center mb-4">
+      <span>
+        <i class="bi bi-clock"></i>
+        <strong>{{ days_left }} days left on your trial.</strong>
+        Upgrade to keep monitoring after your trial ends.
+      </span>
+      <a href="{{ url_for('main.upgrade') }}"
+         class="btn btn-warning btn-sm">
+        View Plans
+      </a>
+    </div>
+  {% else %}
+    <div class="alert alert-info d-flex justify-content-between
+                align-items-center mb-4"
+         style="background:#e8f0fe;border-color:#1a73e8">
+      <span>
+        <i class="bi bi-gift"></i>
+        Free trial — <strong>{{ days_left }} days remaining.</strong>
+        <span class="text-muted small ms-2">
+          Monitoring {{ current_user.user_routes|length }} /
+          {{ current_user.tier_config().max_routes }} routes
+        </span>
+      </span>
+      <a href="{{ url_for('main.upgrade') }}"
+         class="btn btn-sm"
+         style="background:#1a73e8;color:white">
+        Skip Trial →
+      </a>
+    </div>
+  {% endif %}
+{% endif %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3><i class="bi bi-speedometer2"></i> Your Monitored Routes</h3>
+  <a href="{{ url_for('main.add_route') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle"></i> Add Route
+  </a>
+</div>
+
+{% if user_routes %}
+  {% for ur in user_routes %}
+  {% set route = ur.global_route %}
+  <div class="card mb-3 {{ 'opacity-50' if not ur.is_active }}">
+    <div class="card-body">
+      <div class="row align-items-center">
+
+        <div class="col-md-3">
+          <h5 class="mb-1">
+            <i class="bi bi-airplane"></i>
+            {{ route.origin }} &rarr; {{ route.destination }}
+          </h5>
+          <small class="text-muted">
+            {{ route.departure_date }}
+            {% if ur.flexible_dates %}
+              <span class="badge bg-info text-dark ms-1"
+                    style="font-size:10px">
+                ±{{ ur.flex_period_value }}
+                {{ ur.flex_period_type }}
+              </span>
+            {% endif %}
+            {% if route.return_date %}
+              &rarr; {{ route.return_date }}
+            {% else %}
+              (one-way)
+            {% endif %}
+          </small><br>
+          <small class="text-muted">
+            {{ route.adults }} adult(s) &mdash;
+            {{ route.cabin_class | capitalize }}
+            {% if ur.nearby_airports %}
+              &mdash;
+              <i class="bi bi-geo-alt text-success"></i>
+              Nearby
+            {% endif %}
+          </small>
+        </div>
+
+        <div class="col-md-3">
+          {% set latest = route.market|sort(attribute='checked_at')|last if route.market else none %}
+          {% if latest %}
+            <div class="fw-bold fs-5">
+              {{ format_price(convert(latest.market_min,
+                 latest.currency, currency), currency) }}
+            </div>
+            {% if ur.baseline_price and latest.market_min < ur.baseline_price %}
+              <small class="price-drop">
+                <i class="bi bi-arrow-down-circle"></i>
+                Down {{ format_price(convert(
+                  ur.baseline_price - latest.market_min,
+                  latest.currency, currency), currency) }}
+                from baseline
+              </small>
+            {% elif ur.baseline_price %}
+              <small class="text-muted">
+                Baseline {{ format_price(convert(
+                  ur.baseline_price,
+                  latest.currency if latest else "AUD",
+                  currency), currency) }}
+              </small>
+            {% endif %}
+          {% else %}
+            <span class="text-muted">Not checked yet</span>
+          {% endif %}
+        </div>
+
+        <div class="col-md-3">
+          {% if route.last_airline %}
+            <div>
+              <i class="bi bi-airplane-engines"></i>
+              <strong>{{ route.last_airline }}</strong>
+            </div>
+            <small class="text-muted">Cheapest carrier</small>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </div>
+
+        <div class="col-md-1">
+          <small class="text-muted">
+            {% if route.last_checked %}
+              <i class="bi bi-clock"></i><br>
+              {{ route.last_checked.strftime("%d %b") }}<br>
+              {{ route.last_checked.strftime("%H:%M") }}
+            {% else %}
+              Pending
+            {% endif %}
+          </small>
+        </div>
+
+        <div class="col-md-2 text-end">
+          <a href="{{ url_for('main.route_history', user_route_id=ur.id) }}"
+             class="btn btn-sm btn-outline-secondary mb-1 w-100">
+            <i class="bi bi-clock-history"></i> History
+          </a>
+          <form method="POST"
+                action="{{ url_for('main.toggle_route', user_route_id=ur.id) }}"
+                class="d-inline w-100">
+            <button class="btn btn-sm btn-outline-warning mb-1 w-100">
+              {% if ur.is_active %}
+                <i class="bi bi-pause-circle"></i> Pause
+              {% else %}
+                <i class="bi bi-play-circle"></i> Resume
+              {% endif %}
+            </button>
+          </form>
+          <form method="POST"
+                action="{{ url_for('main.delete_route', user_route_id=ur.id) }}"
+                class="w-100"
+                onsubmit="return confirm('Delete this route?')">
+            <button class="btn btn-sm btn-outline-danger w-100">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-airplane text-muted" style="font-size:3rem"></i>
+      <h5 class="mt-3 text-muted">No routes monitored yet</h5>
+      <p class="text-muted">Add your first flight route to start tracking prices.</p>
+      <a href="{{ url_for('main.add_route') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Your First Route
+      </a>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

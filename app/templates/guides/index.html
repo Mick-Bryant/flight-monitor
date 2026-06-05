@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flight Guides — Tips &amp; Routes for Australian Travellers | {{ app_name }}</title>
+  <meta name="description" content="Practical guides for Australian travellers — best times to book, cheapest routes from Sydney and Perth, and tips for finding flight deals.">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; }
+    .page-header {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      color: white;
+      padding: 60px 0 50px;
+    }
+    .page-header h1 { font-size: 2.2rem; font-weight: 700; }
+    .guide-card {
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+      height: 100%;
+    }
+    .guide-card:hover { transform: translateY(-4px); }
+    .guide-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #1a73e8;
+      background: #e8f0fe;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    footer {
+      background: #1a1a2e;
+      color: #999;
+      padding: 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background:#0d47a1">
+    <div class="container">
+      <a class="navbar-brand fw-bold fs-4" href="{{ url_for('main.landing') }}">
+        ✈️ {{ app_name }}
+      </a>
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="{{ url_for('main.guides_index') }}"
+           class="text-white text-decoration-none small me-2"
+           style="opacity:0.85">Guides</a>
+        <a href="{{ url_for('main.faq') }}"
+           class="text-white text-decoration-none small me-2"
+           style="opacity:0.85">FAQ</a>
+        <a href="{{ url_for('auth.login') }}"
+           class="btn btn-outline-light btn-sm">Log In</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="page-header">
+    <div class="container">
+      <h1 class="mb-2">Flight Guides</h1>
+      <p style="opacity:0.85">
+        Practical tips and route guides for Australian travellers
+      </p>
+    </div>
+  </section>
+
+  <section class="py-5">
+    <div class="container">
+      <div class="row g-4">
+        {% for article in articles %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card guide-card p-4">
+            <div class="mb-2">
+              <span class="guide-tag">{{ article.tag }}</span>
+            </div>
+            <h5 class="fw-bold mb-2" style="color:#1a1a2e">
+              {{ article.title }}
+            </h5>
+            <p class="text-muted small mb-3">{{ article.description }}</p>
+            <a href="{{ url_for('main.guide_article', slug=article.slug) }}"
+               class="btn btn-outline-primary btn-sm mt-auto">
+              Read guide <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-5" style="background:#e8f0fe">
+    <div class="container text-center" style="max-width:600px">
+      <h3 class="fw-bold mb-3">Ready to stop searching and start saving?</h3>
+      <p class="text-muted mb-4">
+        {{ app_name }} watches your routes 24/7 and emails you the moment a
+        genuine deal appears — flash sales and historic lows across all carriers.
+      </p>
+      <a href="{{ url_for('auth.login') }}"
+         class="btn btn-primary btn-lg px-4">
+        Start your free 14-day trial
+        <i class="bi bi-arrow-right ms-2"></i>
+      </a>
+      <p class="text-muted small mt-3">No credit card required. Cancel anytime.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-4 mb-md-0">
+          <h5 class="text-white fw-bold mb-3">✈️ {{ app_name }}</h5>
+          <p class="small">
+            Intelligent flight price monitoring for serious travellers.
+            Built in Australia. Monitored from Sydney.
+          </p>
+        </div>
+        <div class="col-md-4 mb-4 mb-md-0">
+          <h6 class="text-white mb-3">Product</h6>
+          <ul class="list-unstyled small">
+            <li><a href="{{ url_for('main.landing') }}#how-it-works"
+                   class="text-decoration-none" style="color:#999">How it works</a></li>
+            <li><a href="{{ url_for('main.landing') }}#pricing"
+                   class="text-decoration-none" style="color:#999">Pricing</a></li>
+            <li><a href="{{ url_for('main.guides_index') }}"
+                   class="text-decoration-none" style="color:#999">Guides</a></li>
+            <li><a href="{{ url_for('main.faq') }}"
+                   class="text-decoration-none" style="color:#999">FAQ</a></li>
+            <li><a href="{{ url_for('auth.login') }}"
+                   class="text-decoration-none" style="color:#999">Log in</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h6 class="text-white mb-3">Legal</h6>
+          <ul class="list-unstyled small">
+            <li><span style="color:#999">
+              Prices are indicative only. Always verify before booking.
+            </span></li>
+          </ul>
+        </div>
+      </div>
+      <hr style="border-color:#333;margin:30px 0">
+      <p class="text-center small mb-0">
+        © 2026 {{ app_name }}. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

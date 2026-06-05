@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Cancel Subscription — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+
+    <div class="card border-danger shadow-sm">
+      <div class="card-header bg-danger text-white py-3">
+        <h5 class="mb-0">
+          <i class="bi bi-exclamation-triangle"></i>
+          Cancel Subscription
+        </h5>
+      </div>
+      <div class="card-body p-4">
+
+        {% if current_user.is_trial() %}
+          <p>You are currently on a <strong>free trial</strong>
+             with {{ current_user.trial_days_remaining() }} days remaining.</p>
+          <div class="alert alert-warning">
+            <strong>If you cancel now:</strong>
+            <ul class="mb-0 mt-2">
+              <li>Your account will be deactivated immediately</li>
+              <li>All route monitoring will stop</li>
+              <li>Your routes and alert history will be saved for 12 months</li>
+              <li>You will not receive a new trial if you reactivate</li>
+            </ul>
+          </div>
+
+        {% elif current_user.account_type == "invited" %}
+          <p>You have a <strong>complimentary Explorer account</strong>.</p>
+          <div class="alert alert-warning">
+            <strong>If you cancel now:</strong>
+            <ul class="mb-0 mt-2">
+              <li>Your account will be deactivated immediately</li>
+              <li>All route monitoring will stop</li>
+              <li>Your routes and alert history will be saved for 12 months</li>
+              <li>Reactivation requires a paid subscription</li>
+            </ul>
+          </div>
+
+        {% else %}
+          <p>You are on the
+             <strong>{{ current_user.tier_config()['name'] }}
+             {{ current_user.billing_period }} plan</strong>.</p>
+          {% if current_user.subscription_period_end %}
+            <div class="alert alert-info">
+              <i class="bi bi-calendar"></i>
+              Your access continues until
+              <strong>
+                {{ current_user.subscription_period_end.strftime("%d %B %Y") }}
+              </strong>.
+              You will not be charged again after that date.
+            </div>
+          {% endif %}
+          <div class="alert alert-warning">
+            <strong>If you cancel:</strong>
+            <ul class="mb-0 mt-2">
+              <li>Monitoring continues until your billing period ends</li>
+              <li>No further charges will be made</li>
+              <li>Your routes and alert history will be saved for 12 months</li>
+              <li>You can reactivate at any time</li>
+            </ul>
+          </div>
+        {% endif %}
+
+        <div class="d-flex gap-3 mt-4">
+          <form method="POST"
+                action="{{ url_for('main.cancel_subscription') }}">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-x-circle"></i>
+              Yes, Cancel My Subscription
+            </button>
+          </form>
+          <a href="{{ url_for('main.profile') }}"
+             class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Keep My Subscription
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

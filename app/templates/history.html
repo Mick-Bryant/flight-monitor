@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% block title %}Price History — {{ app_name }}{% endblock %}
+
+{% block content %}
+{% set latest = user_route.global_route.market|sort(attribute="checked_at")|last
+   if user_route.global_route.market else none %}
+<div class="mb-4">
+  <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Back to Dashboard
+  </a>
+</div>
+
+<h3 class="mb-1">
+  <i class="bi bi-clock-history"></i>
+  {{ route.origin }} &rarr; {{ route.destination }}
+</h3>
+<p class="text-muted mb-4">
+  {{ route.departure_date }}
+  {% if route.return_date %} to {{ route.return_date }}{% endif %}
+  &mdash; {{ route.cabin_class | capitalize }}
+  &mdash; {{ route.adults }} adult(s)
+  {% if current_user.can_optimize() %}
+    {% set mode = user_route.effective_optimize_for() %}
+    {% if mode == 'fastest' %}
+      &mdash; <span class="badge bg-success"
+                    style="font-size:0.72rem">
+        <i class="bi bi-lightning-charge"></i> Fastest mode
+      </span>
+    {% elif mode == 'best_value' %}
+      &mdash; <span class="badge bg-success"
+                    style="font-size:0.72rem">
+        <i class="bi bi-stars"></i> Best Value mode
+      </span>
+    {% endif %}
+  {% endif %}
+</p>
+
+<!-- Price chart -->
+<div class="card mb-4">
+  <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-graph-down"></i> Price History Chart</span>
+    <span class="text-muted small fw-normal">
+      {% if days_of_data >= 180 %}
+        <i class="bi bi-check-circle text-success"></i>
+        Full 6-month history
+      {% elif days_of_data >= 30 %}
+        <i class="bi bi-check-circle text-success"></i>
+        {{ days_of_data }} days of data
+      {% elif days_of_data > 0 %}
+        <i class="bi bi-clock text-warning"></i>
+        {{ days_of_data }} day{% if days_of_data != 1 %}s{% endif %}
+        of data — building history
+      {% else %}
+        <i class="bi bi-hourglass text-muted"></i>
+        First check — collecting data
+      {% endif %}
+    </span>
+  </div>
+  <div class="card-body">
+    <div id="no-data" class="text-center text-muted py-4" style="display:none">
+      <i class="bi bi-hourglass" style="font-size:2rem"></i>
+      <p class="mt-2">Not enough data yet — check back after a few price checks.</p>
+    </div>
+    <canvas id="priceChart" height="100"></canvas>
+    <div class="mt-2 d-flex gap-4 small text-muted">
+      <span>
+        <span style="display:inline-block;width:24px;height:3px;
+                     background:#1a73e8;vertical-align:middle"></span>
+        Market low price
+      </span>
+      <span>
+        <span style="display:inline-block;width:24px;height:3px;
+                     background:#e8710a;border-top:2px dashed #e8710a;
+                     vertical-align:middle"></span>
+        Market median price
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Current status -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-center p-3">
+      <div class="text-muted small mb-1">Market Low Now</div>
+      <div class="fw-bold fs-4" style="color:#1a73e8">
+        {% if latest_median %}
+          {{ format_price(convert(latest_median,
+             latest.currency if latest else "AUD",
+             current_user.preferred_currency),
+             current_user.preferred_currency) }}
+        {% else %}—{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center p-3">
+      <div class="text-muted small mb-1">Market Median</div>
+      <div class="fw-bold fs-4" style="color:#e8710a">
+        {% if latest_median %}
+          {{ format_price(convert(latest_median,
+             latest.currency if latest else "AUD",
+             current_user.preferred_currency),
+             current_user.preferred_currency) }}
+        {% else %}
+          <span class="text-muted small">Need 30 days</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center p-3">
+      <div class="text-muted small mb-1">Baseline Price</div>
+      <div class="fw-bold fs-4">
+        {% if user_route.baseline_price %}
+          {{ format_price(convert(user_route.baseline_price,
+             latest.currency if latest else "AUD",
+             current_user.preferred_currency),
+             current_user.preferred_currency) }}
+        {% else %}—{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center p-3">
+      <div class="text-muted small mb-1">Cheapest Carrier</div>
+      <div class="fw-bold" style="font-size:0.95rem">
+        {{ latest.cheapest_airline if latest else "—" }}
+        {% if latest and latest.cheapest_airline and current_user.is_member(latest.cheapest_airline) %}
+          <br><span class="badge"
+                    style="background:#1a73e8;font-size:10px">
+            Member
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if latest_median and latest_median %}
+  {% set saving = latest_median - latest_median %}
+  {% if saving > 0 %}
+  <div class="alert alert-success py-2 mb-4">
+    <i class="bi bi-graph-down-arrow"></i>
+    Current market low is
+    <strong>
+      {{ format_price(convert(saving,
+         latest.currency if latest else "AUD",
+         current_user.preferred_currency),
+         current_user.preferred_currency) }}
+    </strong>
+    below the market median — this is a good price for this route.
+  </div>
+  {% elif saving < -50 %}
+  <div class="alert alert-warning py-2 mb-4">
+    <i class="bi bi-graph-up-arrow"></i>
+    Current market low is
+    <strong>
+      {{ format_price(convert(saving|abs,
+         latest.currency if latest else "AUD",
+         current_user.preferred_currency),
+         current_user.preferred_currency) }}
+    </strong>
+    above the market median — prices are elevated right now.
+  </div>
+  {% endif %}
+{% endif %}
+
+<!-- Alert history -->
+{% if alerts %}
+<div class="card">
+  <div class="card-header fw-bold">
+    <i class="bi bi-bell"></i> Price Alerts Sent
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Date & Time</th>
+          <th>Type</th>
+          <th>Airline</th>
+          <th>Was</th>
+          <th>Dropped To</th>
+          <th>You Saved</th>
+          <th>6-Month Avg Low</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alert in alerts %}
+        <tr>
+          <td>{{ alert.sent_at.strftime("%d %b %Y %H:%M") }}</td>
+          <td>
+            {% if alert.alert_type == "historic_low" %}
+              <span class="badge"
+                    style="background:linear-gradient(135deg,#e8710a,#1a73e8)">
+                🔥📉 Historic Low
+              </span>
+            {% else %}
+              <span class="badge bg-warning text-dark">
+                🔥 Flash Sale
+              </span>
+            {% endif %}
+          </td>
+          <td>{{ alert.airline or "Unknown" }}</td>
+          <td>{{ alert.currency }} {{ "%.2f"|format(alert.baseline_price) }}</td>
+          <td class="price-drop">
+            {{ alert.currency }} {{ "%.2f"|format(alert.alerted_price) }}
+          </td>
+          <td class="price-drop">
+            <i class="bi bi-arrow-down-circle"></i>
+            {{ alert.currency }} {{ "%.2f"|format(alert.drop_amount) }}
+          </td>
+          <td>
+            {% if alert.historic_avg %}
+              {{ alert.currency }} {{ "%.2f"|format(alert.historic_avg) }}
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="card">
+  <div class="card-body text-center py-5">
+    <i class="bi bi-bell-slash text-muted" style="font-size:3rem"></i>
+    <h5 class="mt-3 text-muted">No alerts sent yet</h5>
+    <p class="text-muted">
+      A 🔥 Flash Sale alert fires when price drops
+      {{ latest.currency if latest else "AUD" }}
+      {{ "%.2f"|format(user_route.threshold_usd) }} from baseline.<br>
+      A 🔥📉 Historic Low alert fires when price beats
+      the 6-month average low (requires 30 days of data).
+    </p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+fetch("/api/routes/{{ route.id }}/history")
+  .then(r => r.json())
+  .then(data => {
+    if (!data.labels || data.labels.length < 2) {
+      document.getElementById("no-data").style.display = "block";
+      document.getElementById("priceChart").style.display = "none";
+      return;
+    }
+    const ctx = document.getElementById("priceChart").getContext("2d");
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: `Market Low (${data.currency})`,
+            data: data.prices,
+            borderColor: "#1a73e8",
+            backgroundColor: "rgba(26,115,232,0.08)",
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: "#1a73e8",
+            fill: true,
+            tension: 0.3,
+          },
+          {
+            label: `Market Median (${data.currency})`,
+            data: data.medians,
+            borderColor: "#e8710a",
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            borderDash: [6, 3],
+            pointRadius: 2,
+            pointBackgroundColor: "#e8710a",
+            fill: false,
+            tension: 0.3,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${data.currency} ${ctx.parsed.y.toLocaleString(
+                'en-AU', {minimumFractionDigits: 2})}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: { callback: val => `${data.currency} ${val.toLocaleString()}` }
+          },
+          x: { ticks: { maxTicksLimit: 10, maxRotation: 45 } }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

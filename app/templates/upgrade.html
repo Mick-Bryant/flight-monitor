@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}Upgrade — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-10">
+
+    <h3 class="mb-2">
+      <i class="bi bi-lightning-charge"></i> Upgrade Your Plan
+    </h3>
+
+    {% if current_tier == "trial" %}
+    <div class="alert alert-info mb-4">
+      <i class="bi bi-clock"></i>
+      You are on a free trial —
+      <strong>{{ days_left }} day{{ 's' if days_left != 1 }} remaining.</strong>
+      Upgrade now to keep monitoring without interruption.
+    </div>
+    {% endif %}
+
+    <div class="row g-4 mb-4">
+
+      <!-- Explorer -->
+      <div class="col-md-6">
+        <div class="card h-100 {{ 'border-primary' if current_tier == 'explorer' }}">
+          <div class="card-header
+            {{ 'bg-primary text-white' if current_tier == 'explorer' else 'bg-light' }}
+            text-center py-3">
+            <h5 class="mb-0">Explorer</h5>
+            <div class="fs-3 fw-bold mt-1">
+              USD $8<span class="fs-6 fw-normal">/month</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                <strong>5 routes</strong>
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                <strong>2 RTW itineraries</strong>
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                1 alert recipient
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Price checks every 2 hours
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Weekly summary + threshold recommendations
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                All alert types — flash sale, historic low, nearby
+              </li>
+            </ul>
+          </div>
+          <div class="card-footer bg-transparent">
+            {% if current_tier == "explorer" %}
+              <button class="btn btn-primary w-100" disabled>
+                <i class="bi bi-check-circle"></i> Current Plan
+              </button>
+            {% elif current_tier == "trial" %}
+              <form method="POST"
+                    action="{{ url_for('main.skip_trial') }}">
+                <input type="hidden" name="tier" value="explorer">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                  <i class="bi bi-lightning-charge"></i>
+                  Subscribe to Explorer
+                </button>
+              </form>
+            {% else %}
+              <button class="btn btn-outline-secondary w-100" disabled>
+                Downgrade (contact support)
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Traveller -->
+      <div class="col-md-6">
+        <div class="card h-100
+          {{ 'border-primary' if current_tier == 'traveller'
+             else 'border-success' }}">
+          <div class="card-header
+            {{ 'bg-primary text-white' if current_tier == 'traveller'
+               else 'bg-success text-white' }}
+            text-center py-3">
+            <h5 class="mb-0">
+              Traveller
+              {% if current_tier != 'traveller' %}
+                <span class="badge bg-warning text-dark ms-2"
+                      style="font-size:11px">
+                  Best Value
+                </span>
+              {% endif %}
+            </h5>
+            <div class="fs-3 fw-bold mt-1">
+              USD $20<span class="fs-6 fw-normal">/month</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                <strong>20 routes</strong>
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                <strong>20 RTW itineraries</strong>
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                <strong>Up to 4 alert recipients</strong>
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                <strong>Price checks every hour</strong>
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                Weekly summary + recommendations + full trend data
+              </li>
+              <li class="mb-2">
+                <i class="bi bi-check-circle text-success"></i>
+                All alert types — flash sale, historic low, nearby
+              </li>
+            </ul>
+          </div>
+          <div class="card-footer bg-transparent">
+            {% if current_tier == "traveller" %}
+              <button class="btn btn-primary w-100" disabled>
+                <i class="bi bi-check-circle"></i> Current Plan
+              </button>
+            {% elif current_tier == "trial" %}
+              <form method="POST"
+                    action="{{ url_for('main.skip_trial') }}">
+                <input type="hidden" name="tier" value="traveller">
+                <button type="submit" class="btn btn-success w-100">
+                  <i class="bi bi-lightning-charge"></i>
+                  Subscribe to Traveller
+                </button>
+              </form>
+            {% else %}
+              <form method="POST"
+                    action="{{ url_for('main.skip_trial') }}">
+                <input type="hidden" name="tier" value="traveller">
+                <button type="submit" class="btn btn-success w-100">
+                  <i class="bi bi-arrow-up-circle"></i>
+                  Upgrade to Traveller
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Trial skip note -->
+    {% if current_tier == "trial" %}
+    <div class="card bg-light border-0 mb-4">
+      <div class="card-body py-3">
+        <p class="mb-0 small text-muted">
+          <i class="bi bi-info-circle"></i>
+          Subscribing now gives you immediate full access.
+          Your {{ days_left }}-day trial period will end and
+          billing starts today. Payment processing via Stripe
+          will be available shortly.
+        </p>
+      </div>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('main.dashboard') }}"
+       class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+
+  </div>
+</div>
+{% endblock %}

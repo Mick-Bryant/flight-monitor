@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ app_name }} Guides{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ app_name }} — intelligent flight price alerts for Australian travellers.{% endblock %}">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; }
+
+    .page-header {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      color: white;
+      padding: 60px 0 50px;
+    }
+    .page-header h1 { font-size: 2.2rem; font-weight: 700; }
+    .page-header .breadcrumb-item a { color: #cce0ff; text-decoration: none; }
+    .page-header .breadcrumb-item.active { color: rgba(255,255,255,0.7); }
+    .page-header .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+    .article-body h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+      color: #1a1a2e;
+    }
+    .article-body h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #1a1a2e;
+    }
+    .article-body p { color: #444; line-height: 1.75; }
+    .article-body ul { color: #444; line-height: 1.9; padding-left: 1.25rem; }
+
+    .data-table th { background: #e8f0fe; color: #1a73e8; font-weight: 600; }
+    .data-table td { vertical-align: middle; }
+
+    .tip-box {
+      background: #e8f0fe;
+      border-left: 4px solid #1a73e8;
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 1.5rem 0;
+    }
+    .tip-box strong { color: #1a73e8; }
+
+    .cta-box {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      border-radius: 12px;
+      padding: 32px;
+      color: white;
+      text-align: center;
+      margin: 2.5rem 0;
+    }
+    .cta-box h4 { font-weight: 700; margin-bottom: 0.5rem; }
+    .cta-box p { opacity: 0.9; margin-bottom: 1.25rem; }
+
+    .guide-card {
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+    .guide-card:hover { transform: translateY(-3px); }
+
+    footer {
+      background: #1a1a2e;
+      color: #999;
+      padding: 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background:#0d47a1">
+    <div class="container">
+      <a class="navbar-brand fw-bold fs-4" href="{{ url_for('main.landing') }}">
+        ✈️ {{ app_name }}
+      </a>
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="{{ url_for('main.guides_index') }}"
+           class="text-white text-decoration-none small me-2"
+           style="opacity:0.85">Guides</a>
+        <a href="{{ url_for('main.faq') }}"
+           class="text-white text-decoration-none small me-2"
+           style="opacity:0.85">FAQ</a>
+        <a href="{{ url_for('auth.login') }}"
+           class="btn btn-outline-light btn-sm">Log In</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="page-header">
+    <div class="container">
+      <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0" style="background:none;padding:0">
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('main.landing') }}">Home</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('main.guides_index') }}">Guides</a>
+          </li>
+          {% block breadcrumb_active %}{% endblock %}
+        </ol>
+      </nav>
+      <h1 class="mb-2">{% block heading %}{% endblock %}</h1>
+      <p style="opacity:0.85">{% block subheading %}{% endblock %}</p>
+    </div>
+  </section>
+
+  <section class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="article-body">
+            {% block article_content %}{% endblock %}
+          </div>
+        </div>
+        <div class="col-lg-4 mt-5 mt-lg-0">
+          <div class="card guide-card p-4 mb-4" style="position:sticky;top:24px">
+            <h6 class="fw-bold mb-3" style="color:#1a73e8">
+              <i class="bi bi-bell me-2"></i>Stop searching. Start monitoring.
+            </h6>
+            <p class="small text-muted mb-3">
+              {{ app_name }} watches your routes around the clock and emails
+              you the moment a genuine deal appears.
+            </p>
+            <ul class="list-unstyled small text-muted mb-3">
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-2"></i>14-day free trial</li>
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-2"></i>No credit card required</li>
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-2"></i>Flash sale + historic low alerts</li>
+              <li class="mb-1"><i class="bi bi-check-circle-fill text-success me-2"></i>All carriers, real market data</li>
+            </ul>
+            <a href="{{ url_for('auth.login') }}"
+               class="btn btn-primary w-100 btn-sm">
+              Start Free Trial <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+
+          <div class="card guide-card p-4">
+            <h6 class="fw-bold mb-3">More guides</h6>
+            <ul class="list-unstyled small mb-0">
+              {% for article in all_articles %}
+              <li class="mb-2">
+                <a href="{{ url_for('main.guide_article', slug=article.slug) }}"
+                   class="text-decoration-none" style="color:#1a73e8">
+                  <i class="bi bi-file-text me-1"></i>{{ article.title }}
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-4 mb-md-0">
+          <h5 class="text-white fw-bold mb-3">✈️ {{ app_name }}</h5>
+          <p class="small">
+            Intelligent flight price monitoring for serious travellers.
+            Built in Australia. Monitored from Sydney.
+          </p>
+        </div>
+        <div class="col-md-4 mb-4 mb-md-0">
+          <h6 class="text-white mb-3">Product</h6>
+          <ul class="list-unstyled small">
+            <li><a href="{{ url_for('main.landing') }}#how-it-works"
+                   class="text-decoration-none" style="color:#999">How it works</a></li>
+            <li><a href="{{ url_for('main.landing') }}#pricing"
+                   class="text-decoration-none" style="color:#999">Pricing</a></li>
+            <li><a href="{{ url_for('main.guides_index') }}"
+                   class="text-decoration-none" style="color:#999">Guides</a></li>
+            <li><a href="{{ url_for('main.faq') }}"
+                   class="text-decoration-none" style="color:#999">FAQ</a></li>
+            <li><a href="{{ url_for('auth.login') }}"
+                   class="text-decoration-none" style="color:#999">Log in</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h6 class="text-white mb-3">Legal</h6>
+          <ul class="list-unstyled small">
+            <li><span style="color:#999">
+              Prices are indicative only. Always verify before booking.
+            </span></li>
+          </ul>
+        </div>
+      </div>
+      <hr style="border-color:#333;margin:30px 0">
+      <p class="text-center small mb-0">
+        © 2026 {{ app_name }}. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

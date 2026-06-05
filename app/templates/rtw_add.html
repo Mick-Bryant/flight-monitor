@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% block title %}Add RTW Itinerary — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h3 class="mb-4">
+      <i class="bi bi-globe2"></i> Add RTW Itinerary
+    </h3>
+
+    <div class="card">
+      <div class="card-body p-4">
+        <p class="text-muted mb-4">
+          Build your Around The World journey leg by leg.
+          When you add each leg, the system checks whether it connects
+          to the previous one. If you are travelling between airports
+          by ground (train, bus, car) just tick the surface segment box.
+        </p>
+
+        <form method="POST" id="rtwForm">
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Itinerary name</label>
+            <input type="text" name="name" class="form-control"
+                   placeholder="e.g. Grand Tour 2026 — SYD→LHR→JFK→NRT→SYD"
+                   required>
+          </div>
+
+          <h5 class="mb-3">
+            <i class="bi bi-map"></i> Flight Legs
+          </h5>
+          <div id="legs_container"></div>
+
+          <button type="button" class="btn btn-outline-primary mb-4"
+                  onclick="addLeg()">
+            <i class="bi bi-plus-circle"></i> Add Next Leg
+          </button>
+
+          <div class="mb-4">
+            <label class="form-label">
+              Alert threshold
+              <span class="text-muted small">
+                — alert when combined total drops by this amount
+              </span>
+            </label>
+            <div class="input-group" style="max-width:300px">
+              <span class="input-group-text">
+                {{ current_user.preferred_currency }}
+              </span>
+              <input type="number" name="threshold_usd" class="form-control"
+                     value="{{ current_user.threshold_international or 600 }}"
+                     min="100" max="10000" step="50">
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-globe2"></i> Start Monitoring
+            </button>
+            <a href="{{ url_for('main.rtw_list') }}"
+               class="btn btn-outline-secondary">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let legCount = 0;
+
+function buildLegCard(n, preOriginCode, preOriginDisplay) {
+  const isFirst   = n === 1;
+  const headerBg  = isFirst ? "bg-primary" : "bg-secondary";
+  const removeBtn = isFirst ? "" : `
+    <button type="button" class="btn btn-sm btn-outline-light"
+            onclick="removeLeg(${n})">
+      <i class="bi bi-x"></i> Remove
+    </button>`;
+
+  const surfaceSection = isFirst ? "" : `
+    <div class="col-12" id="surface_section_${n}" style="display:none">
+      <div class="alert alert-warning py-2 mb-0" id="connection_warning_${n}">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span id="warning_text_${n}"></span>
+      </div>
+      <div class="form-check mt-2">
+        <input type="checkbox" name="leg_surface_${n}"
+               class="form-check-input" id="surface_${n}">
+        <label class="form-check-label" for="surface_${n}">
+          <strong>Surface segment</strong> — I will travel between these
+          airports by ground (train, bus, car, ferry etc.)
+        </label>
+      </div>
+    </div>`;
+
+  return `
+    <div class="leg-card card mb-3" id="leg_${n}">
+      <div class="card-header ${headerBg} text-white d-flex
+                  justify-content-between align-items-center">
+        <span><i class="bi bi-airplane"></i> Leg ${n}</span>
+        ${removeBtn}
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          ${surfaceSection}
+          <div class="col-md-6">
+            <label class="form-label">From</label>
+            <input type="text" id="origin_display_${n}"
+                   class="form-control airport-search"
+                   placeholder="Type city or airport..."
+                   value="${preOriginDisplay}"
+                   autocomplete="off">
+            <input type="hidden" name="leg_origin_${n}"
+                   id="origin_code_${n}" value="${preOriginCode}">
+            <div id="origin_results_${n}" class="list-group mt-1
+                 position-absolute" style="z-index:1000"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">To</label>
+            <input type="text" id="destination_display_${n}"
+                   class="form-control airport-search"
+                   placeholder="Type city or airport..."
+                   autocomplete="off">
+            <input type="hidden" name="leg_destination_${n}"
+                   id="destination_code_${n}">
+            <div id="destination_results_${n}" class="list-group mt-1
+                 position-absolute" style="z-index:1000"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Departure date</label>
+            <input type="date" name="leg_date_${n}"
+                   class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Cabin</label>
+            <select name="leg_cabin_${n}" class="form-select">
+              <option value="economy">Economy</option>
+              <option value="premium_economy">Premium Economy</option>
+              <option value="business">Business</option>
+              <option value="first">First</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Adults</label>
+            <select name="leg_adults_${n}" class="form-select">
+              ${[1,2,3,4,5,6].map(i =>
+                `<option value="${i}"${i===1?' selected':''}>${i}</option>`
+              ).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function addLeg(preOriginCode = "", preOriginDisplay = "") {
+  legCount++;
+  const container = document.getElementById('legs_container');
+  const div = document.createElement('div');
+  div.innerHTML = buildLegCard(legCount, preOriginCode, preOriginDisplay);
+  container.appendChild(div.firstElementChild);
+  setupLegSearch(legCount);
+}
+
+function removeLeg(n) {
+  const card = document.getElementById(`leg_${n}`);
+  if (card) card.remove();
+}
+
+function checkConnection(legNum) {
+  if (legNum <= 1) return;
+
+  const prevDest = document.getElementById(
+    `destination_code_${legNum - 1}`
+  ).value;
+  const thisOrigin = document.getElementById(
+    `origin_code_${legNum}`
+  ).value;
+
+  if (!prevDest || !thisOrigin) return;
+
+  fetch(`/api/rtw/check_connection?prev_dest=${prevDest}&next_origin=${thisOrigin}`)
+    .then(r => r.json())
+    .then(data => {
+      const section = document.getElementById(`surface_section_${legNum}`);
+      const warning = document.getElementById(`connection_warning_${legNum}`);
+      const text    = document.getElementById(`warning_text_${legNum}`);
+
+      if (!section) return;
+
+      if (data.status === "connected" || data.status === "same_city") {
+        // Airports connect — hide the surface segment section
+        section.style.display = "none";
+        warning.className = "alert alert-success py-2 mb-0";
+        text.textContent  = data.message;
+      } else {
+        // Gap detected — show warning and surface segment checkbox
+        section.style.display = "block";
+        warning.className = "alert alert-warning py-2 mb-0";
+        text.textContent  = data.message;
+      }
+    });
+}
+
+function setupLegSearch(legNum) {
+  setupFieldSearch(
+    `origin_display_${legNum}`,
+    `origin_results_${legNum}`,
+    `origin_code_${legNum}`,
+    legNum,
+    "origin"
+  );
+  setupFieldSearch(
+    `destination_display_${legNum}`,
+    `destination_results_${legNum}`,
+    `destination_code_${legNum}`,
+    legNum,
+    "destination"
+  );
+}
+
+function setupFieldSearch(displayId, resultsId, hiddenId, legNum, fieldType) {
+  const input   = document.getElementById(displayId);
+  const results = document.getElementById(resultsId);
+  const hidden  = document.getElementById(hiddenId);
+  if (!input) return;
+  let timer;
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    const term = this.value.trim();
+    if (term.length < 2) { results.innerHTML = ""; return; }
+
+    timer = setTimeout(() => {
+      fetch(`/api/airports?q=${encodeURIComponent(term)}`)
+        .then(r => r.json())
+        .then(airports => {
+          results.innerHTML = "";
+          if (airports.length === 0) {
+            results.innerHTML =
+              '<div class="list-group-item text-muted">No airports found</div>';
+            return;
+          }
+          airports.forEach(airport => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "list-group-item list-group-item-action";
+            item.innerHTML = `
+              <strong>${airport.city} (${airport.iata})</strong>
+              <small class="text-muted d-block">${airport.display}</small>
+              ${airport.region
+                ? `<small class="badge bg-light text-dark border">
+                     ${airport.region}</small>`
+                : ''}`;
+
+            item.addEventListener('click', function() {
+              input.value    = `${airport.city} (${airport.iata})`;
+              hidden.value   = airport.iata;
+              results.innerHTML = "";
+
+              if (fieldType === "destination") {
+                // Auto-fill next leg's origin
+                const nextOriginDisplay = document.getElementById(
+                  `origin_display_${legNum + 1}`
+                );
+                const nextOriginHidden = document.getElementById(
+                  `origin_code_${legNum + 1}`
+                );
+                if (nextOriginDisplay && nextOriginHidden) {
+                  nextOriginDisplay.value = `${airport.city} (${airport.iata})`;
+                  nextOriginHidden.value  = airport.iata;
+                  checkConnection(legNum + 1);
+                }
+              }
+
+              // Check connection for this leg
+              if (fieldType === "origin") {
+                checkConnection(legNum);
+              }
+            });
+            results.appendChild(item);
+          });
+        });
+    }, 300);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target)) results.innerHTML = "";
+  });
+}
+
+// Initialise with first leg
+addLeg();
+</script>
+{% endblock %}
