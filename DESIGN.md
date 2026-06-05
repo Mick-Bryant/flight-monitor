@@ -1,12 +1,13 @@
 # Flight Monitor — Product Design & Specification
-**Version 4.0 | June 2026 | Michael Bryant**
+**Version 5.0 | June 2026 | Michael Bryant**
 
 ---
 
 ## Product Status Summary
 
 Core platform built and deployed · Public marketing site, guides & onboarding live · Production server in Sydney
-Three-tier subscription model finalised · Monetisation (Stripe), production data key & legal pages pending external prerequisites
+Three-tier subscription model finalised · Flight-time optimization modes (Traveller) shipped · Git repository initialised
+Monetisation (Stripe), production data key & legal pages pending external prerequisites
 
 ---
 
@@ -53,6 +54,7 @@ Flight Monitor runs two distinct alert modes simultaneously against market-wide 
 **Genuine differentiators**
 - Intelligent alerting — dual-mode flash-sale plus historic-low detection that fires only on genuinely low prices. The core of the product.
 - Configurable thresholds by route type — domestic plus seven regions, overridable per route; uncommon, and aimed at frequent travellers.
+- Flight-time optimization modes (Traveller) — alerts can track the cheapest, fastest, or best-value offer rather than always the market minimum; per-user default with per-route override.
 - Around The World monitoring with surface segments — genuinely unique; no major competitor tracks a combined multi-leg total.
 - Aligned incentives — private, ad-free, subscription-funded and invite-only; structurally cannot profit from engagement-driven noise.
 
@@ -110,13 +112,20 @@ The product name is not hard-coded. It is stored in `Config.APP_NAME` (set via t
 | Monitor | Duffel v2 market-wide pricing (up to 20 offers/check) | ✅ Complete |
 | Monitor | Market summary (min/median/mean); flash-sale & historic-low alerts | ✅ Complete |
 | Monitor | Nearby + flexible-date sampling; rate-limit protection; baseline reset | ✅ Complete |
+| Monitor | Journey duration parsing (ISO-8601) from Duffel slice data | ✅ Complete |
+| Optimize | Cheapest / Fastest / Best Value modes (Traveller); per-user + per-route | ✅ Complete |
+| Optimize | Effective-cost ranking (price + time value + stop penalty); AUD coefficients admin-editable | ✅ Complete |
+| Optimize | Mode-aware historic series from PriceHistory; MarketSummary unchanged for shared data | ✅ Complete |
 | Currency | Multi-currency preference; live conversion (166); dashboard/email display | ✅ Complete |
 | RTW | Multi-leg itineraries; same-city groups; surface segments; combined alerts | ✅ Complete |
 | Email | All alert templates, weekly summary, trial reminders, reset/invite/confirm | ✅ Complete |
 | Admin | User, airport & invite management; manual scrub; weekly-summary trigger | ✅ Complete |
+| Admin | Alert optimization parameter editor (time value + stop penalty AUD) | ✅ Complete |
 | Public site | Landing page, FAQ, guides index + Sydney/Perth guides | ✅ Complete |
 | UX | Guided onboarding (/welcome); cancellation & reactivation flows | ✅ Complete |
+| UX | Departure date min = today; return date min follows departure | ✅ Complete |
 | Infra | BinaryLane Sydney VPS, Nginx + Let's Encrypt HTTPS, Gunicorn, systemd, nightly scrub | ✅ Complete |
+| Infra | Git repository initialised; deployment via rsync + systemctl | ✅ Complete |
 | Payments | Stripe subscriptions, trial enforcement, tier enforcement | ⏳ Planned |
 | Legal | Terms of Service, Privacy Policy, .com.au domain | ⏳ Planned |
 | Data | Duffel production API key | ⏳ Planned |
@@ -153,12 +162,13 @@ A key architectural decision is the separation of the shared, immutable trip def
 
 | Model | Purpose / Key Fields |
 |---|---|
-| User | Auth (email, password_hash, email_confirmed, tokens); identity (name, account_type); subscription (tier, status, trial_start/end, billing_period, Stripe IDs); preferences (preferred_currency, airline_memberships, alert_email, price_thresholds JSON per region); flags (is_admin, is_active) |
+| User | Auth (email, password_hash, email_confirmed, tokens); identity (name, account_type); subscription (tier, status, trial_start/end, billing_period, Stripe IDs); preferences (preferred_currency, airline_memberships, alert_email, price_thresholds per region, **optimize_for**); flags (is_admin, is_active) |
 | GlobalRoute | Immutable trip: origin, destination, departure_date, return_date, adults, cabin_class. Deduplication key — one shared Duffel call across all watchers. last_checked drives per-tier rate limiting |
-| UserRoute | Links User → GlobalRoute. Personal threshold_usd, baseline_price, is_active; options nearby_airports, flexible_dates, flex_days, flex_duration_days |
-| PriceHistory | Per offer per check: price, currency, airline, stops, is_cheapest. Linked to GlobalRoute; retained 6 months |
-| MarketSummary | Per check per route: market_min, market_median, market_mean, offer_count, cheapest_airline |
-| AlertLog | Permanent record: alert_type (sudden_sale / historic_low), baseline_price, alerted_price, drop_amount |
+| UserRoute | Links User → GlobalRoute. Personal threshold_usd, baseline_price, is_active; options nearby_airports, flexible_dates, flex_days, flex_duration_days; **optimize_for** (nullable — NULL inherits from User) |
+| PriceHistory | Per offer per check: price, currency, airline, stops, **duration_minutes**, is_cheapest. Linked to GlobalRoute; retained 6 months |
+| MarketSummary | Per check per route: market_min, market_median, market_mean, offer_count, cheapest_airline. Shared across all users; never filtered per user |
+| AlertLog | Permanent record: alert_type (sudden_sale / historic_low), baseline_price, alerted_price, drop_amount, airline. All fields reflect the mode-selected offer, not necessarily the market minimum |
+| AppConfig | Admin-editable key/value store. Current keys: time_value_aud_per_hour (default 12.0), stop_penalty_aud (default 40.0). Used by Best Value effective-cost ranking |
 | RTWItinerary + RTWLeg | Multi-leg itinerary with combined price monitoring; surface_segment flag on legs; 30 same-city airport groups for connection validation |
 | Airport | 4,563 airports: iata_code, icao_code, city, country, region, coordinates, airport_type, is_active |
 | Invite | Token-based registration: token, email, expires_at, used_at, used_by, is_active |
@@ -208,9 +218,25 @@ Each check fetches up to 20 offers from Duffel across all available carriers. Ev
 - **Nearby airports** — Haversine distance, 100km radius, large airports only, max 3 per origin, opt-in per route; alert reminds the user to factor in surface travel cost
 - **Flexible dates** — window search producing ~9 sample points; optional flexible duration (±3/7/14 days); cheapest combination used for alerts and baseline; opt-in per route
 
-### 6.5 RTW Monitoring
+### 6.5 Flight-Time Optimization Modes (Traveller)
 
-Around The World itineraries are priced per air leg and summed; the combined total is compared against the baseline total and alerts when it drops by the configured threshold. Surface segments are flagged for connection validation against a 30-city same-city airport group database, with the leg still priced where applicable.
+Traveller-tier users can choose which offer drives their alerts, rather than always the market minimum. The mode is set as a user-level default (profile page) with an optional per-route override (add-route form). Explorer and Trial users are silently downgraded to Cheapest; the model enforces this in `UserRoute.effective_optimize_for()`.
+
+| Mode | Offer Selected | How |
+|---|---|---|
+| **Cheapest** (default) | Lowest price — market minimum | Existing behaviour; no change to any other user |
+| **Fastest** | Shortest total journey duration | `min(duration_minutes)` across all offers with duration data; falls back to cheapest if no duration available |
+| **Best Value** | Lowest effective cost | `price + (time_value_aud/hr × hours) + (stop_penalty_aud × stops)`, with AUD coefficients converted to offer currency via the live exchange rate |
+
+**Historic series:** For Cheapest mode, the existing MarketSummary aggregates are used unchanged. For Fastest and Best Value, the historic series is reconstructed at alert time from raw PriceHistory rows — the mode-optimal offer is selected per historical check, and historic low / median are computed from that series. Pre-migration rows (no `duration_minutes`) are skipped for Fastest mode to prevent the legacy cheapest price from contaminating the duration-based series. Results are cached per mode per route within each check cycle.
+
+**Effective-cost coefficients** are stored in the `AppConfig` table and editable by admins on the admin page. Default values (AUD 12/hr, AUD 40/stop) represent a balanced weighting; AUD 35/hr and AUD 90/stop represent a strong time-saver preference.
+
+**Baseline tracking:** `UserRoute.baseline_price` tracks the mode-selected offer's price, not always the market minimum. This ensures drop calculations and alert guards remain coherent for each user's chosen mode.
+
+### 6.6 RTW Monitoring
+
+Around The World itineraries are priced per air leg (cheapest offer per leg) and summed; the combined total is compared against the baseline total and alerts when it drops by the configured threshold. Optimization modes do not apply to RTW legs — cheapest per leg is always used. Surface segments are flagged for connection validation against a 30-city same-city airport group database, with the leg still priced where applicable.
 
 ---
 
@@ -229,6 +255,7 @@ The model was consolidated to three tiers. A Family tier and an unlimited tier w
 | **Alert recipients** | 1 | 1 | 4 |
 | **Check interval** | 120 min | 120 min | 60 min |
 | **Weekly summary** | Basic | Basic | Full + recommendations |
+| **Optimization modes** | Cheapest only | Cheapest only | Cheapest / Fastest / Best Value |
 
 Annual prices use the "2 months free" framing and sit deliberately below psychological thresholds: Explorer's $80/yr stays under $100, Traveller's $192/yr under $200. AUD is the base currency; Stripe handles conversion at checkout, with approximate local-currency equivalents shown on the marketing page.
 
@@ -299,6 +326,7 @@ Migration from SQLite to PostgreSQL requires changing one line in `config.py`; a
 | `/rtw/<id>` | RTW detail |
 | `/profile` | Name, email, currency, airline memberships |
 | `/profile/thresholds` | Per-region alert thresholds |
+| `/profile/optimize` | Alert optimization mode (Traveller — Cheapest / Fastest / Best Value) |
 | `/upgrade` | Plan comparison + upgrade |
 | `/cancel` + `/cancel/confirm` | Cancellation flow |
 | `/reactivate` + `/reactivate/confirm` | Reactivation flow |
@@ -310,6 +338,7 @@ Migration from SQLite to PostgreSQL requires changing one line in `config.py`; a
 | `/admin` | User list with account-type/tier/status badges; enable/disable, reset password, promote/demote admin (max 2), restore invited users |
 | `/admin/airports` | Add / enable / disable airports |
 | `/admin/invites` | Create, cancel, track invite usage |
+| `/admin/config` | Edit alert optimization coefficients (time_value_aud_per_hour, stop_penalty_aud) |
 | `/admin/send_weekly_summary` | Trigger weekly summary immediately (test) |
 | `/admin/scrub` | Manual data scrub |
 
@@ -468,10 +497,14 @@ Flight Monitor competes on judgment, not coverage. Its defensible edge is intell
 
 | Term | Definition |
 |---|---|
-| Baseline price | The first market-minimum price recorded when a route is added; alert calculations measure from this point |
-| Flash Sale alert | Fires when the market minimum drops below the historic market median by more than the route threshold |
-| Historic Low alert | Fires when the market minimum falls below the average of the lowest 20% of historical prices. Active from day 1 |
-| Market minimum / median | Lowest / middle price across all carriers returned for a route at a check; the median is more stable than the minimum |
+| Baseline price | The price of the mode-selected offer recorded when a route is first checked; alert calculations measure from this point. Resets after an alert or on a price rise |
+| Flash Sale alert | Fires when the mode-selected offer's price drops below the historic median of that offer series by more than the route threshold |
+| Historic Low alert | Fires when the mode-selected offer's price falls below the average of the lowest 20% of that offer's historical prices. Active from day 1 |
+| Market minimum / median | Lowest / middle price across all carriers at a check; stored in MarketSummary and shared across all users. Independent of any user's optimization mode |
+| Optimize mode | The rule used to select which offer drives alerts for a route: Cheapest (default), Fastest (min duration), or Best Value (min effective cost). Traveller-tier only |
+| Effective cost | `price + (time_value_aud/hr × journey_hours) + (stop_penalty_aud × stops)`, converted to offer currency. Used by Best Value mode to rank offers |
+| duration_minutes | Total journey duration in minutes across all slices of an offer, parsed from Duffel's ISO-8601 slice duration field |
+| AppConfig | Admin-editable key/value table for system parameters. Currently stores time_value_aud_per_hour and stop_penalty_aud for Best Value mode |
 | Lookback window | `min(days since route created, 180 days)` — grows as the route ages, capped at 6 months |
 | GlobalRoute / UserRoute | Shared immutable trip definition / a user's personal monitoring link and preferences for that trip |
 | Surface segment | Ground travel between two airports in an RTW itinerary, flagged for connection validation |
