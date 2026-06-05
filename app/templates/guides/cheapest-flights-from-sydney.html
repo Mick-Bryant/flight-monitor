@@ -1,29 +1,36 @@
 {% extends "guides/base.html" %}
 
-{% block title %}Cheapest Flights from Sydney — How to Find the Best Deals | {{ app_name }}{% endblock %}
-{% block meta_description %}A practical guide to finding the cheapest flights from Sydney (SYD). Best times to book, top routes, typical price ranges, and how to never miss a sale.{% endblock %}
+{% block title %}Cheapest Flights from Sydney — When Fares Are Actually Cheap | {{ app_name }}{% endblock %}
+{% block meta_description %}A practical guide to finding genuinely cheap flights from Sydney (SYD). How to read the market, when to act, and why most price alerts mislead you.{% endblock %}
 
 {% block breadcrumb_active %}
 <li class="breadcrumb-item active">Cheapest Flights from Sydney</li>
 {% endblock %}
 
 {% block heading %}Cheapest Flights from Sydney{% endblock %}
-{% block subheading %}How to find the best fares from SYD — and never miss a sale{% endblock %}
+{% block subheading %}How to know when a fare is genuinely cheap — not just cheaper than yesterday{% endblock %}
 
 {% block article_content %}
 
 <p>
-  Sydney Airport (SYD) is Australia's busiest international gateway, served by
-  more than 50 airlines flying to over 100 destinations. That competition is
-  good news for travellers — but only if you know when and how to act. Fares on
-  popular Sydney routes can swing by hundreds of dollars in a single day, and
-  the best deals rarely last more than 24–48 hours.
+  Sydney Airport (SYD) is Australia's busiest international gateway, with strong
+  competition across most major routes. That competition is what creates deals —
+  but deals only matter if you catch them. Fares on popular Sydney routes can
+  swing by AUD $400–600 in a single week, and the genuinely cheap windows
+  rarely last more than 48 hours.
+</p>
+<p>
+  The problem isn't finding prices. Google Flights, Skyscanner, and every airline
+  website will show you a price right now. The problem is knowing whether the
+  price you're looking at is actually good — or just what the route costs today.
+  A $1,400 Sydney–London fare feels like a deal if you've been watching it at
+  $1,900 for six months. It isn't one if the route regularly drops to $1,100.
 </p>
 
 <h2>Most Popular Routes from Sydney</h2>
 <p>
-  These routes consistently see the highest search volumes and the widest price
-  variation — meaning there are deals to be found if you're watching:
+  These routes see the widest price variation and the most frequent flash sales —
+  which means the gap between a good price and a bad one is largest here:
 </p>
 
 <div class="table-responsive mb-4">
@@ -38,16 +45,10 @@
     </thead>
     <tbody>
       <tr>
-        <td><strong>Bali (DPS)</strong></td>
-        <td>$350 – $750</td>
-        <td>~6 hrs</td>
-        <td>Garuda, Jetstar, Scoot</td>
-      </tr>
-      <tr>
         <td><strong>London (LHR)</strong></td>
         <td>$1,200 – $2,800</td>
         <td>~24 hrs</td>
-        <td>Qantas, Singapore Airlines, Emirates</td>
+        <td>Qantas, Singapore Airlines, Emirates, Qatar</td>
       </tr>
       <tr>
         <td><strong>Tokyo (NRT/HND)</strong></td>
@@ -65,7 +66,7 @@
         <td><strong>Singapore (SIN)</strong></td>
         <td>$500 – $1,100</td>
         <td>~8 hrs</td>
-        <td>Singapore Airlines, Scoot, Jetstar</td>
+        <td>Singapore Airlines, Scoot</td>
       </tr>
       <tr>
         <td><strong>Dubai (DXB)</strong></td>
@@ -77,7 +78,13 @@
         <td><strong>Bangkok (BKK)</strong></td>
         <td>$600 – $1,300</td>
         <td>~9 hrs</td>
-        <td>Thai Airways, Qantas, Jetstar</td>
+        <td>Thai Airways, Qantas, EVA Air</td>
+      </tr>
+      <tr>
+        <td><strong>Bali (DPS)</strong></td>
+        <td>$350 – $800</td>
+        <td>~6 hrs</td>
+        <td>Garuda Indonesia, Scoot, AirAsia X</td>
       </tr>
     </tbody>
   </table>
@@ -85,89 +92,103 @@
 
 <p class="text-muted small">
   <i class="bi bi-info-circle me-1"></i>
-  Price ranges are indicative based on observed market data. Actual fares vary
-  with season, booking lead time, and availability. Always verify before booking.
+  Price ranges are indicative based on observed market data for major full-service
+  and regional carriers. Low-cost carrier fares (Jetstar, etc.) should be checked
+  directly with those airlines. Always verify before booking.
 </p>
 
-<h2>Best Time to Book Flights from Sydney</h2>
+<h2>The Difference Between Cheaper and Actually Cheap</h2>
 <p>
-  The window between 6 weeks and 3 months before departure is generally the
-  sweet spot for international flights from Sydney. Book too early (6+ months
-  out) and airlines haven't released sale fares yet. Book too late (under
-  3 weeks) and you're competing for remaining seats at premium prices.
+  This is the question most flight tools don't answer. A fare being "down $80 from
+  last week" tells you almost nothing useful. What matters is whether the current
+  price is low by the standards of <em>that specific route</em> over the past
+  several months — not whether it moved since Tuesday.
 </p>
 <p>
-  That said, flash sales — particularly from Jetstar, Scoot, and Singapore
-  Airlines — can appear at any time and often offer the best prices available.
-  These sales typically last 48–72 hours and don't wait for you to be actively
-  searching.
+  Sydney–London is a good example. The typical economy range is roughly AUD $1,200
+  to $2,800, but that span hides the real pattern. The route has a genuine floor —
+  a price level it rarely drops below — and a ceiling it rarely exceeds outside peak
+  periods. A fare at $1,350 isn't just cheap relative to yesterday; it's cheap
+  relative to six months of market data. That's the price worth acting on.
 </p>
 
 <div class="tip-box">
-  <strong><i class="bi bi-lightbulb me-2"></i>The problem with manual searching:</strong>
-  Most travellers check prices occasionally — once a week, or when they
-  remember. Flash sales don't work on that schedule. A Sydney–London sale that
-  saves AUD $400 might open on a Tuesday afternoon and close by Thursday.
-  Automated monitoring is the only reliable way to catch them.
+  <strong><i class="bi bi-lightbulb me-2"></i>Why flash sales disappear so fast:</strong>
+  When an airline releases a promotional fare, it's competing with every other
+  carrier on that route simultaneously. Other airlines often match within hours.
+  Then demand fills the seats and the fare is gone — often within 48 hours of
+  appearing. Manual checking can't keep up. By the time you notice and check, the
+  window has usually closed.
 </div>
 
-<h2>Cheapest Months to Fly from Sydney</h2>
-<p>
-  Seasonality matters significantly for Sydney departures. As a general guide:
-</p>
-<ul>
-  <li>
-    <strong>Europe (London, Paris, Rome):</strong> Cheapest in Australian
-    autumn/winter (April–June). European summer (July–August) commands a
-    significant premium. Avoid school holidays.
-  </li>
-  <li>
-    <strong>Bali:</strong> Cheapest in Australia's dry winter months
-    (June–August coincides with Bali's peak season, but airfares are lower
-    due to reduced AU domestic travel). Avoid Christmas and school holidays.
-  </li>
-  <li>
-    <strong>Japan:</strong> Avoid cherry blossom (late March–April) and
-    Golden Week (late April–early May). Best value is June and September–November.
-  </li>
-  <li>
-    <strong>USA:</strong> January and February (after Christmas/New Year rush)
-    offer the lowest fares. Summer (June–August) is expensive.
-  </li>
-</ul>
+<h2>When Prices Are Lowest from Sydney</h2>
 
-<h2>Sydney's Nearby Airport Options</h2>
+<h3>London and Europe</h3>
 <p>
-  Unlike travellers in Melbourne or Brisbane, Sydney doesn't have a large
-  secondary airport with significantly cheaper fares. Newcastle Airport (NTL)
-  is approximately 160km north, but has limited international connections.
-  For most Sydney travellers, SYD is the practical departure point.
+  The cheapest fares to London typically appear in Australian autumn (March–May),
+  when European summer hasn't yet inflated demand. July and August are the most
+  expensive months — European peak season, Australian school holidays, and high
+  business travel overlap. Avoid Christmas and Easter entirely unless you book
+  9–12 months in advance.
+</p>
+
+<h3>Japan</h3>
+<p>
+  Cherry blossom season (late March–April) and Golden Week (late April–early May)
+  are Japan's busiest tourist periods — fares reflect this. June and
+  September–November offer the best combination of lower fares and good weather.
+  Japan Airlines and ANA run periodic flash sales to Sydney that can cut the
+  typical fare by $300–400; these are worth monitoring continuously.
+</p>
+
+<h3>United States</h3>
+<p>
+  January and February (post-holiday) are the cheapest months for Sydney–LA.
+  Summer travel (June–August American) pushes prices up significantly. Qantas's
+  non-stop Sydney–New York service occasionally runs sale fares that represent
+  genuine value when they appear.
+</p>
+
+<h3>Asia and Bali</h3>
+<p>
+  Singapore and Bangkok routes are relatively stable year-round but see frequent
+  flash sales. Bali fares from Sydney vary more than the short flying time would
+  suggest — school holiday periods (July, September, December) add a meaningful
+  premium, while April–June and October typically offer the best prices.
+</p>
+
+<h2>Sydney's Airport Alternatives</h2>
+<p>
+  Sydney has no large secondary international airport with meaningfully cheaper
+  fares. Newcastle (NTL) has limited international connections and isn't a
+  practical alternative for most routes.
 </p>
 <p>
-  However, it's worth considering flying out of Melbourne (MEL) for heavily
-  competed international routes — particularly to London and Los Angeles —
-  where the price difference can sometimes exceed the cost of a SYD–MEL
-  positioning flight.
+  One exception worth considering: on highly competitive long-haul routes like
+  SYD–LHR and SYD–LAX, it's occasionally worth comparing fares from Melbourne
+  (MEL). The SYD–MEL airfare plus a cheaper MEL international departure can
+  undercut the Sydney-originating fare — particularly if you have flexible dates.
 </p>
 
 <h2>Airline Memberships Worth Having from Sydney</h2>
 <p>
-  If you fly regularly from Sydney, joining these frequent flyer programs costs
-  nothing and can save you money through seat upgrades and status benefits:
+  Joining these is free and earns you status benefits, seat upgrades, and
+  occasionally early access to member sales:
 </p>
 <ul>
-  <li><strong>Qantas Frequent Flyer</strong> — essential for Qantas, Jetstar, and partner airlines</li>
-  <li><strong>Virgin Australia Velocity</strong> — useful for domestic connections and partner international flights</li>
-  <li><strong>Singapore Airlines KrisFlyer</strong> — excellent for SYD–SIN and connecting flights through Singapore</li>
-  <li><strong>Emirates Skywards</strong> — valuable for SYD–DXB and onward connections to Europe and UK</li>
+  <li><strong>Qantas Frequent Flyer</strong> — essential for Qantas and Jetstar; the largest domestic network</li>
+  <li><strong>Singapore Airlines KrisFlyer</strong> — excellent for SYD–SIN and onward connections to Europe and beyond</li>
+  <li><strong>Emirates Skywards</strong> — valuable for the SYD–DXB route and connections to UK and Africa</li>
+  <li><strong>Japan Airlines Mileage Bank / ANA Mileage Club</strong> — worth holding if you fly Japan regularly; both run periodic member sales</li>
 </ul>
 
 <div class="cta-box">
-  <h4>Never miss a Sydney flight deal again</h4>
+  <h4>Stop guessing. Know when Sydney fares are genuinely cheap.</h4>
   <p>
-    {{ app_name }} watches your Sydney routes around the clock — flash sales,
-    historic lows, and nearby airport options — and emails you the moment a
-    genuine deal appears.
+    {{ app_name }} compares every fare against that route's own six-month history
+    and only alerts you when the price is at a genuine low — not on every minor
+    fluctuation. One caught deal on a Sydney long-haul route typically saves more
+    than a full year's subscription.
   </p>
   <a href="{{ url_for('auth.login') }}"
      class="btn btn-light btn-lg px-4"
@@ -176,21 +197,29 @@
     <i class="bi bi-arrow-right ms-2"></i>
   </a>
   <p class="mt-3 mb-0" style="font-size:0.85rem;opacity:0.85">
-    No credit card required · Cancel anytime
+    No credit card required · No ads · Cancel anytime
   </p>
 </div>
 
-<h2>How {{ app_name }} Helps Sydney Travellers</h2>
+<h2>How {{ app_name }} Works for Sydney Routes</h2>
 <p>
-  {{ app_name }} watches up to 20 live offers per route at every check — not
-  just a single carrier — giving you a true picture of the market. When the
-  price drops by your threshold, or hits a historic low for that route, you
-  get an instant email with the best options and direct booking links.
+  {{ app_name }} runs two independent checks on every route it monitors. The first
+  looks for flash sales — prices that have dropped sharply below the route's
+  historic median. The second looks for historic lows — prices that are genuinely
+  cheap by the standards of the past six months of market data. Both checks run
+  around the clock; you only hear from us when one of them actually fires.
 </p>
 <p>
-  For Sydney–London and other long-haul routes where prices swing by
-  AUD $500 or more, a single alert typically saves many times the cost of a
-  Traveller annual subscription.
+  That's the key difference from a standard price alert: we stay quiet during the
+  normal ups and downs, and send you one email when the price is actually worth
+  acting on. For Sydney's long-haul routes — where the spread between a normal
+  price and a genuine low can exceed AUD $500 — that distinction is what makes the
+  difference between a useful tool and more noise in your inbox.
+</p>
+<p>
+  {{ app_name }} covers major international carriers on Sydney routes. For
+  domestic routes or LCC-only fares, check airlines directly — we'll tell you
+  which full-service carriers are running the best international deals.
 </p>
 
 {% endblock %}

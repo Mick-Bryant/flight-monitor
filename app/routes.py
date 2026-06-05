@@ -121,14 +121,32 @@ GUIDES = [
     {
         "slug": "cheapest-flights-from-sydney",
         "title": "Cheapest Flights from Sydney",
-        "description": "Best times to book, top routes, price ranges, and tips for finding deals from SYD.",
+        "description": "Best times to book, top routes, price ranges, and how to know when a Sydney fare is genuinely cheap.",
         "tag": "Sydney",
+    },
+    {
+        "slug": "cheapest-flights-from-melbourne",
+        "title": "Cheapest Flights from Melbourne",
+        "description": "Route guide for MEL — when fares are genuinely low, which routes swing most, and how to catch the real deals.",
+        "tag": "Melbourne",
+    },
+    {
+        "slug": "cheapest-flights-from-brisbane",
+        "title": "Cheapest Flights from Brisbane",
+        "description": "Route guide for BNE — Pacific, Asian, and European routes with price ranges and booking timing tips.",
+        "tag": "Brisbane",
     },
     {
         "slug": "cheapest-flights-from-perth",
         "title": "Cheapest Flights from Perth",
-        "description": "Route guide for PER including the direct London flight, Bali fares, and when to book.",
+        "description": "Route guide for PER including the direct London flight, Bali fares, and how to catch flash sales.",
         "tag": "Perth",
+    },
+    {
+        "slug": "how-to-find-cheap-flights",
+        "title": "How to Find Cheap Flights from Australia",
+        "description": "Why most price alerts are noise, what 'actually cheap' means, and how to stop guessing and start knowing.",
+        "tag": "Guide",
     },
 ]
 
