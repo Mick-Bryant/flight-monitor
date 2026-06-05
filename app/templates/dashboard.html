@@ -94,6 +94,20 @@
               <i class="bi bi-geo-alt text-success"></i>
               Nearby
             {% endif %}
+            {% if current_user.can_optimize() %}
+              {% set mode = ur.effective_optimize_for() %}
+              {% if mode == 'fastest' %}
+                &mdash; <span class="badge bg-success"
+                              style="font-size:10px">
+                  <i class="bi bi-lightning-charge"></i> Fastest
+                </span>
+              {% elif mode == 'best_value' %}
+                &mdash; <span class="badge bg-success"
+                              style="font-size:10px">
+                  <i class="bi bi-stars"></i> Best Value
+                </span>
+              {% endif %}
+            {% endif %}
           </small>
         </div>
 
