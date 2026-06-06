@@ -18,6 +18,28 @@
     }
     .page-header h1 { font-size: 2.2rem; font-weight: 700; }
 
+    .search-wrap {
+      position: relative;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .search-wrap .bi-search {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      pointer-events: none;
+    }
+    #faq-search {
+      padding-left: 2.4rem;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+    #faq-search:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+    }
+
     .accordion-button:not(.collapsed) {
       background-color: #e8f0fe;
       color: #1a73e8;
@@ -34,6 +56,7 @@
       border-bottom: none;
       border-radius: 0 0 12px 12px !important;
     }
+
     .section-label {
       font-size: 0.7rem;
       font-weight: 700;
@@ -42,13 +65,18 @@
       color: #1a73e8;
       margin: 2rem 0 0.5rem;
     }
-    .section-label:first-child { margin-top: 0; }
 
-    footer {
-      background: #1a1a2e;
-      color: #999;
-      padding: 40px 0;
+    .faq-section { transition: opacity 0.15s; }
+    .faq-section.hidden { display: none; }
+
+    #no-results {
+      display: none;
+      text-align: center;
+      color: #888;
+      padding: 2rem 0;
     }
+
+    footer { background: #1a1a2e; color: #999; padding: 40px 0; }
   </style>
 </head>
 <body>
@@ -59,7 +87,10 @@
       <a class="navbar-brand fw-bold fs-4" href="{{ url_for('main.landing') }}">
         ✈️ {{ app_name }}
       </a>
-      <div class="ms-auto d-flex gap-2">
+      <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="{{ url_for('main.guides_index') }}"
+           class="text-white text-decoration-none small me-2"
+           style="opacity:0.85">Guides</a>
         <a href="{{ url_for('auth.login') }}"
            class="btn btn-outline-light btn-sm">Log In</a>
       </div>
@@ -80,420 +111,57 @@
   <section class="py-5">
     <div class="container" style="max-width:760px">
 
-      <!-- Getting Started -->
-      <p class="section-label">Getting Started</p>
-      <div class="card shadow-sm mb-4">
-        <div class="accordion" id="faq-start">
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q1">
-                How does the free trial work?
-              </button>
-            </h2>
-            <div id="q1" class="accordion-collapse collapse show"
-                 data-bs-parent="#faq-start">
-              <div class="accordion-body text-muted">
-                Your trial runs for 14 days from the moment you register. During
-                the trial you get full access to all alert types, up to 3 routes
-                and 1 RTW itinerary, and price checks every 2 hours. No credit
-                card is required to start. At the end of the trial you can
-                upgrade to Explorer or Traveller to keep monitoring.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q2">
-                Do I need a credit card to sign up?
-              </button>
-            </h2>
-            <div id="q2" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-start">
-              <div class="accordion-body text-muted">
-                No. The 14-day trial is completely free with no credit card
-                required. You only need to provide payment details when you
-                choose to upgrade to a paid plan.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q3">
-                How do I get access? Is it open to everyone?
-              </button>
-            </h2>
-            <div id="q3" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-start">
-              <div class="accordion-body text-muted">
-                {{ app_name }} is currently invite-only during its early beta
-                phase. Registration requires an invitation link from an existing
-                member or the {{ app_name }} team. This lets us maintain quality
-                and grow responsibly before opening publicly.
-              </div>
-            </div>
-          </div>
-
-        </div>
+      <!-- Search -->
+      <div class="search-wrap mb-5">
+        <i class="bi bi-search"></i>
+        <input type="search" id="faq-search" class="form-control"
+               placeholder="Search questions…" autocomplete="off">
       </div>
 
-      <!-- How Alerts Work -->
-      <p class="section-label">How Alerts Work</p>
-      <div class="card shadow-sm mb-4">
-        <div class="accordion" id="faq-alerts">
+      <!-- Sections -->
+      {% for section in faq %}
+      <div class="faq-section" data-section="{{ loop.index }}">
+        <p class="section-label">{{ section.section }}</p>
+        <div class="card shadow-sm mb-4">
+          <div class="accordion" id="faq-section-{{ loop.index }}">
 
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q4">
-                What's the difference between a Flash Sale and Historic Low alert?
-              </button>
-            </h2>
-            <div id="q4" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-alerts">
-              <div class="accordion-body text-muted">
-                <strong>Flash Sale</strong> alerts fire when the current market
-                price drops by your threshold amount compared to recent prices —
-                a sudden movement that signals a limited-time sale.<br><br>
-                <strong>Historic Low</strong> alerts fire when the current price
-                is lower than the average of the cheapest 20% of prices we've
-                seen for that route over time — meaning it's genuinely the
-                cheapest this route has been, not just temporarily cheaper.
-                Both alert types are active from day one.
+            {% for item in section.questions %}
+            {% set qid = "q-" ~ loop.index0 ~ "-" ~ loop.index %}
+            <div class="accordion-item faq-item"
+                 data-question="{{ item.q | lower }}"
+                 data-answer="{{ item.a | striptags | lower }}">
+              <h2 class="accordion-header">
+                <button class="accordion-button {% if not (loop.first and loop.index0 == 0) %}collapsed{% endif %}"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#{{ qid }}">
+                  {{ item.q }}
+                </button>
+              </h2>
+              <div id="{{ qid }}"
+                   class="accordion-collapse collapse {% if loop.first and loop.index0 == 0 %}show{% endif %}"
+                   data-bs-parent="#faq-section-{{ loop.index }}">
+                <div class="accordion-body text-muted">
+                  {{ item.a | safe }}
+                </div>
               </div>
             </div>
-          </div>
+            {% endfor %}
 
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q5">
-                How often are prices checked?
-              </button>
-            </h2>
-            <div id="q5" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-alerts">
-              <div class="accordion-body text-muted">
-                Trial and Explorer users get price checks every 2 hours.
-                Traveller users get checks every hour. Prices are pulled from
-                the live Duffel flight API, giving you real market data across
-                all carriers — not cached or delayed results.
-              </div>
-            </div>
           </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q6">
-                What is my alert threshold and how do I set it?
-              </button>
-            </h2>
-            <div id="q6" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-alerts">
-              <div class="accordion-body text-muted">
-                Your threshold is the minimum price drop (in your preferred
-                currency) that triggers a Flash Sale alert. {{ app_name }} sets
-                smart regional defaults — for example, international long-haul
-                routes have a higher default threshold than short domestic ones.
-                You can override the threshold per route, or set a global
-                default in your profile. Traveller users also receive threshold
-                recommendations based on observed price movements for each route.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q7">
-                Will I get false alerts when prices temporarily dip?
-              </button>
-            </h2>
-            <div id="q7" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-alerts">
-              <div class="accordion-body text-muted">
-                {{ app_name }} includes a false alert guard — if the price
-                has risen since the last alert was sent, no new alert fires.
-                Your baseline price also automatically resets when prices rise
-                or after an alert, so the system always compares against a
-                meaningful reference point rather than an outdated one.
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
+      {% endfor %}
 
-      <!-- Features -->
-      <p class="section-label">Features</p>
-      <div class="card shadow-sm mb-4">
-        <div class="accordion" id="faq-features">
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q8">
-                What is the Nearby Airports feature?
-              </button>
-            </h2>
-            <div id="q8" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-features">
-              <div class="accordion-body text-muted">
-                When you enable Nearby Airports on a route, {{ app_name }} also
-                checks major airports within 100km of your origin for cheaper
-                departure options. If a nearby airport has a significantly
-                cheaper fare, you'll receive a separate alert showing the saving
-                — along with a reminder to factor in the cost of getting to
-                that airport.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q9">
-                What is Flexible Date searching?
-              </button>
-            </h2>
-            <div id="q9" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-features">
-              <div class="accordion-body text-muted">
-                Instead of monitoring a single departure date, Flexible Date
-                search monitors a window of dates around your target. Flight
-                Monitor samples approximately 9 dates across the window
-                regardless of how wide it is, finding the cheapest day to fly.
-                You can also set a flexible trip duration (±3, 7, or 14 days
-                from your base duration) to catch deals on slightly shorter or
-                longer trips.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q10">
-                What are RTW itineraries?
-              </button>
-            </h2>
-            <div id="q10" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-features">
-              <div class="accordion-body text-muted">
-                RTW (Around The World) itineraries let you monitor multi-leg
-                journeys as a single combined price. Add each leg of your trip
-                and {{ app_name }} tracks the total cost across all legs,
-                alerting you when the combined price drops below your threshold.
-                Each alert includes a per-leg breakdown so you can see exactly
-                where the savings came from. Surface segments (ground travel
-                between legs) are flagged in the breakdown.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q11">
-                What is the Weekly Summary email?
-              </button>
-            </h2>
-            <div id="q11" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-features">
-              <div class="accordion-body text-muted">
-                Every Monday morning (9am AEST) you receive a summary of all
-                your monitored routes — current prices, weekly price movement,
-                trend direction, and any alerts fired during the week. Traveller
-                users also get historic average low comparisons, top carriers
-                per route, and personalised threshold recommendations based on
-                observed price data (available after 30 days of data).
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q12">
-                Which currencies are supported?
-              </button>
-            </h2>
-            <div id="q12" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-features">
-              <div class="accordion-body text-muted">
-                {{ app_name }} supports 166 currencies. You can set your
-                preferred currency in your profile and all prices — on the
-                dashboard, in alerts, and in weekly summaries — will be shown
-                in that currency. Exchange rates are refreshed every hour.
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Pricing & Billing -->
-      <p class="section-label">Pricing &amp; Billing</p>
-      <div class="card shadow-sm mb-4">
-        <div class="accordion" id="faq-billing">
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q13">
-                What's the difference between Explorer and Traveller?
-              </button>
-            </h2>
-            <div id="q13" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-billing">
-              <div class="accordion-body text-muted">
-                <strong>Explorer</strong> (AUD $8/month or $80/year) gives you
-                5 routes, 2 RTW itineraries, and 1 alert recipient — ideal for
-                monitoring a handful of regular routes.<br><br>
-                <strong>Traveller</strong> (AUD $20/month or $192/year) gives
-                you 20 routes, 20 RTW itineraries, up to 4 alert recipients,
-                hourly price checks (vs every 2 hours), and the full weekly
-                summary with threshold recommendations. Designed for frequent
-                or multi-destination travellers. The annual plan typically pays
-                for itself on the first deal it catches.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q14">
-                Is there a discount for paying annually?
-              </button>
-            </h2>
-            <div id="q14" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-billing">
-              <div class="accordion-body text-muted">
-                Yes — both plans include 2 months free on the annual option.
-                Explorer annual is AUD $80 (vs $96 monthly). Traveller annual
-                is AUD $192 (vs $240 monthly). Annual plans are billed upfront.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q15">
-                How does cancellation work?
-              </button>
-            </h2>
-            <div id="q15" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-billing">
-              <div class="accordion-body text-muted">
-                You can cancel at any time from your Profile page. Monthly
-                plans run to the end of the current billing month before
-                deactivating. Annual plans run to the end of the current annual
-                period. Trial cancellations take effect immediately. Your data
-                is retained for 12 months after deactivation in case you
-                choose to reactivate.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q16">
-                Can I reactivate my account after cancelling?
-              </button>
-            </h2>
-            <div id="q16" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-billing">
-              <div class="accordion-body text-muted">
-                Yes. You can reactivate from the login page and choose a
-                monthly or annual plan. A new billing period starts from
-                reactivation. Previous trial users who cancelled must
-                subscribe to a paid plan — a new free trial is not available
-                on reactivation.
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Data & Privacy -->
-      <p class="section-label">Data &amp; Privacy</p>
-      <div class="card shadow-sm mb-4">
-        <div class="accordion" id="faq-data">
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q17">
-                Where do the flight prices come from?
-              </button>
-            </h2>
-            <div id="q17" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-data">
-              <div class="accordion-body text-muted">
-                Prices are sourced from the Duffel flight API, which aggregates
-                real-time fares from airlines and global distribution systems.
-                Each price check fetches up to 20 live offers per route.
-                Prices are indicative — always verify the current fare on the
-                airline or booking site before purchasing.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q18">
-                Do you sell my data or show ads?
-              </button>
-            </h2>
-            <div id="q18" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-data">
-              <div class="accordion-body text-muted">
-                No. {{ app_name }} is a subscription product. We do not sell
-                your data, show ads, or share your route information with
-                third parties. Your route and travel preferences are used
-                solely to power your price alerts.
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button"
-                      data-bs-toggle="collapse" data-bs-target="#q19">
-                How long is my price history kept?
-              </button>
-            </h2>
-            <div id="q19" class="accordion-collapse collapse"
-                 data-bs-parent="#faq-data">
-              <div class="accordion-body text-muted">
-                Price history and market summaries are retained for 6 months.
-                Older data is automatically removed nightly. Your alert history
-                is kept permanently so you have a record of every deal you were
-                notified about. Account data is retained for 12 months after
-                deactivation.
-              </div>
-            </div>
-          </div>
-
-        </div>
+      <div id="no-results">
+        <i class="bi bi-search fs-3 d-block mb-2"></i>
+        No questions match your search.
       </div>
 
       <!-- CTA -->
       <div class="text-center mt-5 mb-2">
         <p class="text-muted mb-3">Still have questions?</p>
-        <a href="{{ url_for('auth.login') }}"
-           class="btn btn-primary px-4">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary px-4">
           Start your free trial
           <i class="bi bi-arrow-right ms-2"></i>
         </a>
@@ -516,14 +184,26 @@
         <div class="col-md-4 mb-4 mb-md-0">
           <h6 class="text-white mb-3">Product</h6>
           <ul class="list-unstyled small">
-            <li><a href="{{ url_for('main.landing') }}#how-it-works"
-                   class="text-decoration-none" style="color:#999">How it works</a></li>
-            <li><a href="{{ url_for('main.landing') }}#pricing"
-                   class="text-decoration-none" style="color:#999">Pricing</a></li>
-            <li><a href="{{ url_for('main.faq') }}"
-                   class="text-decoration-none" style="color:#fff">FAQ</a></li>
-            <li><a href="{{ url_for('auth.login') }}"
-                   class="text-decoration-none" style="color:#999">Log in</a></li>
+            <li class="mb-1">
+              <a href="{{ url_for('main.landing') }}#how-it-works"
+                 class="text-decoration-none" style="color:#999">How it works</a>
+            </li>
+            <li class="mb-1">
+              <a href="{{ url_for('main.landing') }}#pricing"
+                 class="text-decoration-none" style="color:#999">Pricing</a>
+            </li>
+            <li class="mb-1">
+              <a href="{{ url_for('main.faq') }}"
+                 class="text-decoration-none" style="color:#fff">FAQ</a>
+            </li>
+            <li class="mb-1">
+              <a href="{{ url_for('main.guides_index') }}"
+                 class="text-decoration-none" style="color:#999">Guides</a>
+            </li>
+            <li class="mb-1">
+              <a href="{{ url_for('auth.login') }}"
+                 class="text-decoration-none" style="color:#999">Log in</a>
+            </li>
           </ul>
         </div>
         <div class="col-md-4">
@@ -545,5 +225,32 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const searchInput = document.getElementById('faq-search');
+    const noResults   = document.getElementById('no-results');
+
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.trim().toLowerCase();
+      let anyVisible = false;
+
+      document.querySelectorAll('.faq-section').forEach(section => {
+        let sectionHasMatch = false;
+
+        section.querySelectorAll('.faq-item').forEach(item => {
+          const matches = !term
+            || item.dataset.question.includes(term)
+            || item.dataset.answer.includes(term);
+
+          item.style.display = matches ? '' : 'none';
+          if (matches) sectionHasMatch = true;
+        });
+
+        section.classList.toggle('hidden', !sectionHasMatch);
+        if (sectionHasMatch) anyVisible = true;
+      });
+
+      noResults.style.display = anyVisible ? 'none' : 'block';
+    });
+  </script>
 </body>
 </html>

@@ -108,9 +108,122 @@ def landing():
     return render_template("landing.html")
 
 
+FAQ = [
+    {
+        "section": "Getting Started",
+        "questions": [
+            {
+                "q": "How does the free trial work?",
+                "a": "Your trial runs for 14 days from the moment you register. During the trial you get full access to all alert types, up to 3 routes and 1 RTW itinerary, and price checks every 2 hours. No credit card is required to start. At the end of the trial you can upgrade to Explorer or Traveller to keep monitoring.",
+            },
+            {
+                "q": "Do I need a credit card to sign up?",
+                "a": "No. The 14-day trial is completely free with no credit card required. You only need to provide payment details when you choose to upgrade to a paid plan.",
+            },
+            {
+                "q": "How do I get access? Is it open to everyone?",
+                "a": "Flight Monitor is currently invite-only during its early beta phase. Registration requires an invitation link from an existing member or the Flight Monitor team. This lets us maintain quality and grow responsibly before opening publicly.",
+            },
+        ],
+    },
+    {
+        "section": "How Alerts Work",
+        "questions": [
+            {
+                "q": "What's the difference between a Flash Sale and Historic Low alert?",
+                "a": "<strong>Flash Sale</strong> alerts fire when the current market price drops by your threshold amount compared to recent prices — a sudden movement that signals a limited-time sale.<br><br><strong>Historic Low</strong> alerts fire when the current price is lower than the average of the cheapest 20% of prices recorded for that route over time — meaning it's genuinely the cheapest this route has been, not just temporarily cheaper. Both alert types are active from day one.",
+            },
+            {
+                "q": "How often are prices checked?",
+                "a": "Trial and Explorer users get price checks every 2 hours. Traveller users get checks every hour. Prices are pulled from the live Duffel flight API, giving you real market data across all carriers — not cached or delayed results.",
+            },
+            {
+                "q": "What is my alert threshold and how do I set it?",
+                "a": "Your threshold is the minimum price drop (in your preferred currency) that triggers a Flash Sale alert. Flight Monitor sets smart regional defaults — for example, international long-haul routes have a higher default threshold than short domestic ones. You can override the threshold per route, or set a global default in your profile. Traveller users also receive threshold recommendations based on observed price movements for each route.",
+            },
+            {
+                "q": "Will I get false alerts when prices temporarily dip?",
+                "a": "Flight Monitor includes a false alert guard — if the price has risen since the last alert was sent, no new alert fires. Your baseline price also automatically resets when prices rise or after an alert, so the system always compares against a meaningful reference point rather than an outdated one.",
+            },
+        ],
+    },
+    {
+        "section": "Features",
+        "questions": [
+            {
+                "q": "What are Cheapest, Fastest and Best Value alert modes?",
+                "a": "Traveller users can choose which offer drives their alerts — not just the cheapest one available:<br><br><strong>Cheapest</strong> (default) — alerts on the lowest-price offer, the standard behaviour.<br><br><strong>Fastest</strong> — alerts on the shortest total journey time. Useful if you value your time over the last dollar saved.<br><br><strong>Best Value</strong> — alerts on the offer with the lowest effective cost, which combines price with the time cost of a longer journey and the inconvenience of extra stops. The weighting coefficients are configurable.<br><br>The mode is set as a default in your profile and can be overridden per route. Explorer and Trial users always use Cheapest mode.",
+            },
+            {
+                "q": "What are RTW itineraries?",
+                "a": "RTW (Around The World) itineraries let you monitor multi-leg journeys as a single combined price. Add each leg of your trip and Flight Monitor tracks the total cost across all legs, alerting you when the combined price drops below your threshold. Each alert includes a per-leg breakdown so you can see exactly where the savings came from. Surface segments (ground travel between legs) are flagged in the breakdown.",
+            },
+            {
+                "q": "What is the Nearby Airports feature?",
+                "a": "When you enable Nearby Airports on a route, Flight Monitor also checks major airports within 100km of your origin for cheaper departure options. If a nearby airport has a significantly cheaper fare, you'll receive a separate alert showing the saving — along with a reminder to factor in the cost of getting to that airport.",
+            },
+            {
+                "q": "What is Flexible Date searching?",
+                "a": "Instead of monitoring a single departure date, Flexible Date search monitors a window of dates around your target. Flight Monitor samples approximately 9 dates across the window regardless of how wide it is, finding the cheapest day to fly. You can also set a flexible trip duration (±3, 7, or 14 days from your base duration) to catch deals on slightly shorter or longer trips.",
+            },
+            {
+                "q": "Which airlines and carriers does Flight Monitor cover?",
+                "a": "Flight Monitor sources prices from Duffel, which covers NDC (New Distribution Capability) airlines — including Qantas, Emirates, Singapore Airlines, British Airways, Lufthansa, and most major full-service international carriers.<br><br>Low-cost carriers that sell direct only — such as Jetstar, Ryanair, and AirAsia — are not currently included. For routes where LCCs are the dominant option, Flight Monitor works best as a complement to a quick direct check on those airlines' own sites.",
+            },
+            {
+                "q": "What is the Weekly Summary email?",
+                "a": "Every Monday morning (9am AEST) you receive a summary of all your monitored routes — current prices, weekly price movement, trend direction, and any alerts fired during the week. Traveller users also get historic average low comparisons, top carriers per route, and personalised threshold recommendations based on observed price data (available after 30 days of data).",
+            },
+            {
+                "q": "Which currencies are supported?",
+                "a": "Flight Monitor supports 166 currencies. You can set your preferred currency in your profile and all prices — on the dashboard, in alerts, and in weekly summaries — will be shown in that currency. Exchange rates are refreshed every hour.",
+            },
+        ],
+    },
+    {
+        "section": "Pricing & Billing",
+        "questions": [
+            {
+                "q": "What's the difference between Explorer and Traveller?",
+                "a": "<strong>Explorer</strong> (AUD $8/month or $80/year) suits occasional to regular travellers monitoring a handful of routes. 5 routes, 2 RTW itineraries, 1 alert recipient, checks every 2 hours.<br><br><strong>Traveller</strong> (AUD $20/month or $192/year) is for frequent flyers and power users who want the full toolkit: 20 routes, 20 RTW itineraries, up to 4 alert recipients, hourly checks, and Cheapest / Fastest / Best Value optimization modes. The full weekly summary with threshold recommendations is also Traveller-only. The annual plan typically pays for itself on the first deal it catches.",
+            },
+            {
+                "q": "Is there a discount for paying annually?",
+                "a": "Yes — both plans include 2 months free on the annual option. Explorer annual is AUD $80 (vs $96 monthly). Traveller annual is AUD $192 (vs $240 monthly). Annual plans are billed upfront.",
+            },
+            {
+                "q": "How does cancellation work?",
+                "a": "You can cancel at any time from your Profile page. Monthly plans run to the end of the current billing month before deactivating. Annual plans run to the end of the current annual period. Trial cancellations take effect immediately. Your data is retained for 12 months after deactivation in case you choose to reactivate.",
+            },
+            {
+                "q": "Can I reactivate my account after cancelling?",
+                "a": "Yes. You can reactivate from the login page and choose a monthly or annual plan. A new billing period starts from reactivation. Previous trial users who cancelled must subscribe to a paid plan — a new free trial is not available on reactivation.",
+            },
+        ],
+    },
+    {
+        "section": "Data & Privacy",
+        "questions": [
+            {
+                "q": "Where do the flight prices come from?",
+                "a": "Prices are sourced from the Duffel flight API, which aggregates real-time fares from airlines and global distribution systems. Each price check fetches up to 20 live offers per route. Prices are indicative — always verify the current fare on the airline or booking site before purchasing.",
+            },
+            {
+                "q": "Do you sell my data or show ads?",
+                "a": "No. Flight Monitor is a subscription product. We do not sell your data, show ads, or share your route information with third parties. Your route and travel preferences are used solely to power your price alerts.",
+            },
+            {
+                "q": "How long is my price history kept?",
+                "a": "Price history and market summaries are retained for 6 months. Older data is automatically removed nightly. Your alert history is kept permanently so you have a record of every deal you were notified about. Account data is retained for 12 months after deactivation.",
+            },
+        ],
+    },
+]
+
+
 @main_bp.route("/faq")
 def faq():
-    return render_template("faq.html")
+    return render_template("faq.html", faq=FAQ)
 
 
 # ---------------------------------------------------------------------------

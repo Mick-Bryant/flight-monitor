@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ app_name }} — Never Pay Full Price for a Flight Again</title>
+  <title>{{ app_name }} — Know When It's Actually Cheap</title>
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet"
@@ -19,6 +19,50 @@
     .hero h1 { font-size: 2.8rem; font-weight: 700; }
     .hero p.lead { font-size: 1.25rem; opacity: 0.9; }
 
+    .stat-box {
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    .stat-box .stat-number { font-size: 2.5rem; font-weight: 700; }
+    .stat-box .stat-sub { font-size: 0.75rem; opacity: 0.75; margin-top: 4px; }
+
+    .audience-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 28px 24px;
+      height: 100%;
+      background: white;
+      transition: box-shadow 0.2s;
+    }
+    .audience-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+    .audience-card.featured { border: 2px solid #1a73e8; }
+    .audience-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 16px;
+    }
+
+    .diff-card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      height: 100%;
+      padding: 28px 24px;
+      transition: transform 0.2s;
+    }
+    .diff-card:hover { transform: translateY(-3px); }
+    .diff-icon {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
     .feature-icon {
       width: 56px; height: 56px;
       background: #e8f0fe;
@@ -28,40 +72,17 @@
       margin-bottom: 16px;
     }
 
-    .pricing-card {
-      border-radius: 12px;
-      transition: transform 0.2s;
-    }
+    .pricing-card { border-radius: 12px; transition: transform 0.2s; }
     .pricing-card:hover { transform: translateY(-4px); }
-    .pricing-card.featured {
-      border: 2px solid #1a73e8 !important;
-    }
-    .pricing-card .price {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #1a73e8;
-    }
-    .pricing-card .price-annual {
-      font-size: 0.9rem;
-      color: #666;
-    }
-
-    .stat-box {
-      background: rgba(255,255,255,0.15);
-      border-radius: 12px;
-      padding: 24px;
-      text-align: center;
-    }
-    .stat-box .stat-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-    }
-
-    .testimonial {
-      background: #f8f9fa;
-      border-left: 4px solid #1a73e8;
-      border-radius: 0 8px 8px 0;
-      padding: 20px 24px;
+    .pricing-card.featured { border: 2px solid #1a73e8 !important; }
+    .pricing-card .price { font-size: 2.5rem; font-weight: 700; color: #1a73e8; }
+    .tier-audience {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      margin-bottom: 4px;
     }
 
     .check-item {
@@ -70,30 +91,24 @@
     }
     .check-item i { color: #188038; margin-top: 2px; flex-shrink: 0; }
 
-    footer {
-      background: #1a1a2e;
-      color: #999;
-      padding: 40px 0;
-    }
+    footer { background: #1a1a2e; color: #999; padding: 40px 0; }
   </style>
 </head>
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark"
-       style="background:#0d47a1">
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background:#0d47a1">
     <div class="container">
-      <a class="navbar-brand fw-bold fs-4" href="/">
-        ✈️ {{ app_name }}
-      </a>
+      <a class="navbar-brand fw-bold fs-4" href="/">✈️ {{ app_name }}</a>
       <div class="ms-auto d-flex gap-2 align-items-center">
+        <a href="{{ url_for('main.guides_index') }}"
+           class="text-white text-decoration-none small me-2"
+           style="opacity:0.85">Guides</a>
         <a href="{{ url_for('main.faq') }}"
            class="text-white text-decoration-none small me-2"
            style="opacity:0.85">FAQ</a>
         <a href="{{ url_for('auth.login') }}"
-           class="btn btn-outline-light btn-sm">
-          Log In
-        </a>
+           class="btn btn-outline-light btn-sm">Log In</a>
       </div>
     </div>
   </nav>
@@ -103,13 +118,20 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-7">
+          <p class="mb-2"
+             style="opacity:0.8;font-size:0.9rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase">
+            For serious travellers
+          </p>
           <h1 class="mb-4">
-            Never pay full price<br>for a flight again.
+            Know when it's<br>actually cheap.
           </h1>
-          <p class="lead mb-4">
-            {{ app_name }} watches your routes around the clock and
-            alerts you the moment prices drop — using real market data,
-            not just one airline's price.
+          <p class="lead mb-3">
+            Most price alerts fire whenever a fare dips. {{ app_name }} alerts only
+            when a fare is genuinely low by its own historical standards — combining
+            flash-sale detection with historic-low analysis across the full market.
+          </p>
+          <p class="mb-4" style="opacity:0.85;font-size:1.05rem">
+            Fewer alerts. Higher confidence. No noise.
           </p>
           <div class="d-flex gap-3 flex-wrap">
             <a href="{{ url_for('auth.login') }}"
@@ -118,40 +140,42 @@
               Start Free Trial
               <i class="bi bi-arrow-right ms-2"></i>
             </a>
-            <a href="#how-it-works"
-               class="btn btn-outline-light btn-lg px-4">
+            <a href="#how-it-works" class="btn btn-outline-light btn-lg px-4">
               How it works
             </a>
           </div>
           <p class="mt-3 small" style="opacity:0.8">
-            14-day free trial · No credit card required ·
-            Cancel anytime
+            14-day free trial · No credit card required · Cancel anytime
           </p>
         </div>
         <div class="col-lg-5 mt-5 mt-lg-0">
           <div class="row g-3">
             <div class="col-6">
               <div class="stat-box">
-                <div class="stat-number">166</div>
-                <div>currencies supported</div>
+                <div class="stat-number">2</div>
+                <div>alert modes</div>
+                <div class="stat-sub">Flash Sale + Historic Low</div>
               </div>
             </div>
             <div class="col-6">
               <div class="stat-box">
-                <div class="stat-number">4,500+</div>
-                <div>airports worldwide</div>
+                <div class="stat-number">RTW</div>
+                <div>itinerary monitoring</div>
+                <div class="stat-sub">No other tool does this</div>
               </div>
             </div>
             <div class="col-6">
               <div class="stat-box">
-                <div class="stat-number">24/7</div>
-                <div>price monitoring</div>
+                <div class="stat-number">0</div>
+                <div>ads. Ever.</div>
+                <div class="stat-sub">Subscription-funded only</div>
               </div>
             </div>
             <div class="col-6">
               <div class="stat-box">
                 <div class="stat-number">$0</div>
                 <div>to get started</div>
+                <div class="stat-sub">14-day free trial</div>
               </div>
             </div>
           </div>
@@ -160,12 +184,251 @@
     </div>
   </section>
 
-  <!-- How it works -->
-  <section id="how-it-works" class="py-5">
+  <!-- Who it's for -->
+  <section class="py-5" style="background:#f8f9fa">
     <div class="container">
-      <h2 class="text-center fw-bold mb-2">How it works</h2>
+      <h2 class="text-center fw-bold mb-2">Who it's for</h2>
       <p class="text-center text-muted mb-5">
-        Three steps to never missing a flight deal again
+        Built for travellers who take flights seriously
+      </p>
+      <div class="row g-4">
+
+        <div class="col-md-4">
+          <div class="audience-card">
+            <div class="audience-icon" style="background:#e8f0fe;color:#1a73e8">
+              <i class="bi bi-airplane"></i>
+            </div>
+            <h5 class="fw-bold mb-2">The long-haul deal hunter</h5>
+            <p class="text-muted small mb-3">
+              You're watching Sydney → London or Melbourne → Tokyo. You want to know
+              when the market genuinely drops — not when an airline runs a 5% promotion.
+            </p>
+            <ul class="list-unstyled small text-muted mb-0">
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Historic-low detection across all NDC carriers</span>
+              </li>
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Flash sale alerts within hours of going live</span>
+              </li>
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Nearby airport alternatives automatically checked</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="audience-card featured">
+            <div class="audience-icon" style="background:#1a73e8;color:white">
+              <i class="bi bi-person-badge"></i>
+            </div>
+            <h5 class="fw-bold mb-2">The frequent flyer</h5>
+            <p class="text-muted small mb-3">
+              Multiple routes, loyalty memberships, and you know the difference
+              between a mediocre deal and a real one. You need alerts that respect
+              your time — and that you can tune.
+            </p>
+            <ul class="list-unstyled small text-muted mb-0">
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Configurable thresholds by route type and region</span>
+              </li>
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Hourly checks with Cheapest, Fastest or Best Value modes</span>
+              </li>
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Up to 4 alert recipients — the whole family</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="audience-card">
+            <div class="audience-icon" style="background:#e6f4ea;color:#188038">
+              <i class="bi bi-globe2"></i>
+            </div>
+            <h5 class="fw-bold mb-2">The RTW planner</h5>
+            <p class="text-muted small mb-3">
+              You're building a multi-leg around-the-world journey and want to
+              track the combined price. No other tool monitors a full RTW itinerary
+              as a single total.
+            </p>
+            <ul class="list-unstyled small text-muted mb-0">
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Up to 20 legs monitored as one combined price</span>
+              </li>
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Surface segment support for overland connections</span>
+              </li>
+              <li class="check-item">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Alert when the total drops by your threshold</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Genuine differentiators -->
+  <section class="py-5" style="background:white">
+    <div class="container">
+      <h2 class="text-center fw-bold mb-2">Genuinely different</h2>
+      <p class="text-center text-muted mb-5">
+        Not a rebadged price-drop notifier — built differently from the ground up
+      </p>
+
+      <!-- Top 3 differentiators as cards -->
+      <div class="row g-4 mb-2">
+        <div class="col-md-4">
+          <div class="diff-card">
+            <div class="diff-icon" style="background:#e8f0fe;color:#1a73e8">
+              <i class="bi bi-graph-down-arrow"></i>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <h5 class="fw-bold mb-0">Dual-mode intelligence</h5>
+              <span class="badge bg-primary" style="font-size:10px">Core</span>
+            </div>
+            <p class="text-muted small mb-2">
+              Two independent analyses run on every check.
+              <strong>Flash Sale</strong> fires when the market drops below its historic
+              median by your threshold. <strong>Historic Low</strong> fires when a price
+              falls below the average of the cheapest 20% ever recorded for that route —
+              regardless of recent trends.
+            </p>
+            <p class="text-muted small mb-0" style="font-style:italic">
+              Free tools alert on any dip. {{ app_name }} alerts on significance.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="diff-card">
+            <div class="diff-icon" style="background:#e6f4ea;color:#188038">
+              <i class="bi bi-globe2"></i>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <h5 class="fw-bold mb-0">RTW itinerary monitoring</h5>
+              <span class="badge bg-success" style="font-size:10px">Unique</span>
+            </div>
+            <p class="text-muted small mb-0">
+              Monitor a multi-leg itinerary as a single combined price total. Add up to
+              20 legs, include surface segments for overland connections, and get alerted
+              when the full journey drops by your threshold. No other flight tool does this.
+            </p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="diff-card">
+            <div class="diff-icon" style="background:#fff3e0;color:#e65100">
+              <i class="bi bi-sliders"></i>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <h5 class="fw-bold mb-0">Configurable thresholds</h5>
+              <span class="badge bg-warning text-dark" style="font-size:10px">Uncommon</span>
+            </div>
+            <p class="text-muted small mb-0">
+              Alert thresholds are set by route type — domestic, regional, and seven
+              international regions — with per-route overrides. Different routes have
+              different normal price swings. You decide what counts as a deal, not us.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary differentiators -->
+      <div class="row g-4 mt-2">
+        <div class="col-md-6">
+          <div class="check-item">
+            <i class="bi bi-check-circle-fill"
+               style="color:#1a73e8;font-size:1.1rem;margin-top:1px;flex-shrink:0"></i>
+            <div>
+              <strong>Flight-time optimization modes</strong>
+              <span class="badge bg-success ms-1" style="font-size:10px">Traveller</span><br>
+              <span class="text-muted small">
+                Get alerted on the cheapest, fastest, or best-value offer. Best Value weighs
+                price against journey time and stops using your configurable coefficients.
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="check-item">
+            <i class="bi bi-check-circle-fill"
+               style="color:#1a73e8;font-size:1.1rem;margin-top:1px;flex-shrink:0"></i>
+            <div>
+              <strong>No ads. No commissions. Ever.</strong><br>
+              <span class="text-muted small">
+                {{ app_name }} is subscription-funded. We don't sell your data, show ads,
+                or earn booking commissions. We work only for the subscriber.
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="check-item">
+            <i class="bi bi-check-circle-fill"
+               style="color:#1a73e8;font-size:1.1rem;margin-top:1px;flex-shrink:0"></i>
+            <div>
+              <strong>Invite-only membership</strong><br>
+              <span class="text-muted small">
+                Private by design. No public sign-up, no growth-at-all-costs model.
+                Quality of alerting over scale of users.
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="check-item">
+            <i class="bi bi-check-circle-fill"
+               style="color:#1a73e8;font-size:1.1rem;margin-top:1px;flex-shrink:0"></i>
+            <div>
+              <strong>Flexible dates + nearby airports</strong><br>
+              <span class="text-muted small">
+                Monitor a date window to find your cheapest travel day. Automatically
+                check airports within 100km for cheaper departure options.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table stakes acknowledgement -->
+      <div class="mt-5 pt-4 border-top">
+        <p class="text-muted small text-center mb-3">Plus everything you'd expect as standard</p>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+          <span class="badge bg-light text-dark border py-2 px-3">Market-wide pricing across all carriers</span>
+          <span class="badge bg-light text-dark border py-2 px-3">166 currencies</span>
+          <span class="badge bg-light text-dark border py-2 px-3">4,500+ airports</span>
+          <span class="badge bg-light text-dark border py-2 px-3">Price history charts</span>
+          <span class="badge bg-light text-dark border py-2 px-3">Direct booking links</span>
+          <span class="badge bg-light text-dark border py-2 px-3">Airline membership highlights</span>
+        </div>
+        <p class="text-center text-muted mt-3 mb-0" style="font-size:0.8rem">
+          Flight data covers NDC carriers via Duffel. For LCC routes (Jetstar, Ryanair),
+          {{ app_name }} is a complement to a quick direct check.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="py-5" style="background:#f8f9fa">
+    <div class="container">
+      <h2 class="text-center fw-bold mb-2">Simple to set up</h2>
+      <p class="text-center text-muted mb-5">
+        Running in minutes, watching around the clock
       </p>
       <div class="row g-4 text-center">
         <div class="col-md-4">
@@ -174,125 +437,37 @@
           </div>
           <h5 class="fw-bold">1. Add your routes</h5>
           <p class="text-muted">
-            Enter the flights you want to monitor — origin, destination,
-            travel dates. Set your alert threshold or use our smart
-            regional defaults.
+            Enter the flights you want to monitor — origin, destination, travel dates.
+            Set your alert threshold or use our smart regional defaults.
           </p>
         </div>
         <div class="col-md-4">
           <div class="feature-icon mx-auto">
             <i class="bi bi-graph-down-arrow"></i>
           </div>
-          <h5 class="fw-bold">2. We watch the market</h5>
+          <h5 class="fw-bold">2. We analyse the market</h5>
           <p class="text-muted">
-            {{ app_name }} checks prices across all carriers every hour,
-            tracking the full market — not just one airline.
-            We compare against historical data to know what's genuinely cheap.
+            {{ app_name }} checks prices across all NDC carriers every hour, running
+            flash-sale and historic-low analysis on every check. We build the baseline —
+            you don't have to watch.
           </p>
         </div>
         <div class="col-md-4">
           <div class="feature-icon mx-auto">
             <i class="bi bi-bell"></i>
           </div>
-          <h5 class="fw-bold">3. Get alerted</h5>
+          <h5 class="fw-bold">3. Get a signal, not noise</h5>
           <p class="text-muted">
-            When a genuine deal appears — a flash sale or a historic low —
-            you get an instant email with the best options across all
-            carriers and direct booking links.
+            When a genuine deal appears, you get an email with the best options,
+            direct booking links, and the context to decide with confidence.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Key features -->
-  <section class="py-5" style="background:#f8f9fa">
-    <div class="container">
-      <h2 class="text-center fw-bold mb-2">
-        More intelligent than free tools
-      </h2>
-      <p class="text-center text-muted mb-5">
-        {{ app_name }} goes beyond basic price alerts
-      </p>
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-4">
-          <div class="check-item">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>
-              <strong>Dual alert modes</strong><br>
-              <span class="text-muted small">
-                Flash sale detection AND historic low alerts — knows
-                when a price is genuinely cheap, not just temporarily lower.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="check-item">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>
-              <strong>Market-wide pricing</strong><br>
-              <span class="text-muted small">
-                Compares all carriers per check — not just the cheapest
-                at a single moment. See the full picture.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="check-item">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>
-              <strong>Nearby airport search</strong><br>
-              <span class="text-muted small">
-                Automatically checks airports within 100km for cheaper
-                departure options you might not have considered.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="check-item">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>
-              <strong>Flexible date search</strong><br>
-              <span class="text-muted small">
-                Monitor a date window — find the cheapest day to fly
-                within your travel window automatically.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="check-item">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>
-              <strong>Around The World itineraries</strong><br>
-              <span class="text-muted small">
-                Monitor multi-leg RTW journeys as a combined price.
-                Get alerted when the total cost drops.
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="check-item">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>
-              <strong>No ads. Ever.</strong><br>
-              <span class="text-muted small">
-                {{ app_name }} is a subscription product. We don't sell
-                your data or show ads. Just clean, useful alerts.
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Pricing -->
-  <section class="py-5" id="pricing">
+  <section class="py-5" id="pricing" style="background:white">
     <div class="container">
       <h2 class="text-center fw-bold mb-2">Simple pricing</h2>
       <p class="text-center text-muted mb-5">
@@ -304,10 +479,9 @@
         <div class="col-md-4">
           <div class="card pricing-card h-100 shadow-sm">
             <div class="card-header text-center bg-light py-3">
+              <div class="tier-audience">Try it out</div>
               <h5 class="mb-0">Free Trial</h5>
-              <div class="price mt-2" style="color:#666">
-                AUD $0
-              </div>
+              <div class="price mt-2" style="color:#666">AUD $0</div>
               <small class="text-muted">14 days</small>
             </div>
             <div class="card-body">
@@ -322,7 +496,7 @@
                 </li>
                 <li class="check-item">
                   <i class="bi bi-check-circle-fill"></i>
-                  <span>All alert types</span>
+                  <span>Flash Sale + Historic Low alerts</span>
                 </li>
                 <li class="check-item">
                   <i class="bi bi-check-circle-fill"></i>
@@ -347,15 +521,13 @@
         <div class="col-md-4">
           <div class="card pricing-card h-100 shadow-sm">
             <div class="card-header text-center bg-light py-3">
+              <div class="tier-audience">Occasional to regular traveller</div>
               <h5 class="mb-0">Explorer</h5>
               <div class="price mt-2">AUD $8</div>
               <small class="text-muted">
                 per month &nbsp;·&nbsp;
                 <strong>AUD $80/year</strong>
-                <span class="badge bg-success ms-1"
-                      style="font-size:10px">
-                  2 months free
-                </span>
+                <span class="badge bg-success ms-1" style="font-size:10px">2 months free</span>
               </small>
             </div>
             <div class="card-body">
@@ -370,7 +542,7 @@
                 </li>
                 <li class="check-item">
                   <i class="bi bi-check-circle-fill"></i>
-                  <span>All alert types</span>
+                  <span>Flash Sale + Historic Low alerts</span>
                 </li>
                 <li class="check-item">
                   <i class="bi bi-check-circle-fill"></i>
@@ -394,12 +566,11 @@
         <!-- Traveller -->
         <div class="col-md-4">
           <div class="card pricing-card featured h-100 shadow">
-            <div class="card-header text-center py-3"
-                 style="background:#1a73e8">
+            <div class="card-header text-center py-3" style="background:#1a73e8">
+              <div class="tier-audience" style="color:#cce0ff">Frequent flyer &amp; power user</div>
               <h5 class="mb-0 text-white">
                 Traveller
-                <span class="badge bg-warning text-dark ms-2"
-                      style="font-size:11px">
+                <span class="badge bg-warning text-dark ms-2" style="font-size:11px">
                   Best Value
                 </span>
               </h5>
@@ -407,8 +578,7 @@
               <small style="color:#cce0ff">
                 per month &nbsp;·&nbsp;
                 <strong>AUD $192/year</strong>
-                <span class="badge bg-warning text-dark ms-1"
-                      style="font-size:10px">
+                <span class="badge bg-warning text-dark ms-1" style="font-size:10px">
                   2 months free
                 </span>
               </small>
@@ -425,27 +595,24 @@
                 </li>
                 <li class="check-item">
                   <i class="bi bi-check-circle-fill"></i>
-                  <span>
-                    <strong>Up to 4 alert recipients</strong>
-                  </span>
+                  <span><strong>Up to 4 alert recipients</strong></span>
                 </li>
                 <li class="check-item">
                   <i class="bi bi-check-circle-fill"></i>
-                  <span>
-                    <strong>Price checks every hour</strong>
-                  </span>
+                  <span><strong>Price checks every hour</strong></span>
                 </li>
                 <li class="check-item">
                   <i class="bi bi-check-circle-fill"></i>
-                  <span>
-                    Full weekly summary + threshold recommendations
-                  </span>
+                  <span><strong>Cheapest / Fastest / Best Value modes</strong></span>
+                </li>
+                <li class="check-item">
+                  <i class="bi bi-check-circle-fill"></i>
+                  <span>Full weekly summary + threshold recommendations</span>
                 </li>
               </ul>
-              <p class="text-muted small mt-3 mb-0"
-                 style="font-style:italic">
-                Annual cost (AUD $192) is typically less than the
-                saving from a single caught international alert.
+              <p class="text-muted small mt-3 mb-0" style="font-style:italic">
+                Annual cost (AUD $192) is typically less than the saving
+                from a single caught international alert.
               </p>
             </div>
             <div class="card-footer bg-transparent">
@@ -458,7 +625,6 @@
         </div>
 
       </div>
-
       <p class="text-center text-muted mt-4 small">
         All prices in AUD. Annual plans billed upfront.
         Monthly equivalent shown for annual plans.
@@ -472,11 +638,17 @@
       <h3 class="fw-bold mb-3">
         The Traveller annual plan costs less than one caught deal
       </h3>
-      <p class="text-muted mb-0" style="max-width:600px;margin:0 auto">
+      <p class="text-muted mb-4" style="max-width:600px;margin:0 auto">
         A typical alert on a Sydney → London route saves AUD $300–800.
         The Traveller annual plan is AUD $192. {{ app_name }} pays for
         itself on the first alert it catches.
       </p>
+      <a href="{{ url_for('auth.login') }}"
+         class="btn btn-primary btn-lg px-5"
+         style="font-weight:600">
+        Start Your Free Trial
+        <i class="bi bi-arrow-right ms-2"></i>
+      </a>
     </div>
   </section>
 
@@ -494,18 +666,28 @@
         <div class="col-md-4 mb-4 mb-md-0">
           <h6 class="text-white mb-3">Product</h6>
           <ul class="list-unstyled small">
-            <li><a href="#how-it-works"
-                   class="text-decoration-none"
-                   style="color:#999">How it works</a></li>
-            <li><a href="#pricing"
-                   class="text-decoration-none"
-                   style="color:#999">Pricing</a></li>
-            <li><a href="{{ url_for('main.faq') }}"
-                   class="text-decoration-none"
-                   style="color:#999">FAQ</a></li>
-            <li><a href="{{ url_for('auth.login') }}"
-                   class="text-decoration-none"
-                   style="color:#999">Log in</a></li>
+            <li class="mb-1">
+              <a href="#how-it-works" class="text-decoration-none" style="color:#999">
+                How it works
+              </a>
+            </li>
+            <li class="mb-1">
+              <a href="#pricing" class="text-decoration-none" style="color:#999">
+                Pricing
+              </a>
+            </li>
+            <li class="mb-1">
+              <a href="{{ url_for('main.faq') }}" class="text-decoration-none"
+                 style="color:#999">FAQ</a>
+            </li>
+            <li class="mb-1">
+              <a href="{{ url_for('main.guides_index') }}" class="text-decoration-none"
+                 style="color:#999">Guides</a>
+            </li>
+            <li class="mb-1">
+              <a href="{{ url_for('auth.login') }}" class="text-decoration-none"
+                 style="color:#999">Log in</a>
+            </li>
           </ul>
         </div>
         <div class="col-md-4">
