@@ -64,6 +64,13 @@
             </div>
           </div>
 
+          <!-- LCC coverage note — shown for domestic routes -->
+          <div id="lcc-note" class="alert alert-info py-2 px-3 mb-3 d-none"
+               role="alert" style="font-size:0.875rem">
+            <i class="bi bi-info-circle me-1"></i>
+            Flight Monitor tracks full-service carrier fares via Duffel. For domestic routes also served by Jetstar or Virgin low-cost fares, do a quick direct check on the airline's site too.
+          </div>
+
           <div class="mb-4">
             <label class="form-label" id="threshold_label">
               Price drop alert — minimum saving to trigger an alert
@@ -297,6 +304,14 @@ function updateThreshold() {
 
       // Show the override hint below the field
       document.getElementById('threshold_hint').style.display = 'block';
+
+      // Show LCC coverage note for domestic routes
+      const lccNote = document.getElementById('lcc-note');
+      if (data.route_type === 'domestic') {
+        lccNote.classList.remove('d-none');
+      } else {
+        lccNote.classList.add('d-none');
+      }
     });
 }
 
