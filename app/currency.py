@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)
 
-_cache = {
+_cache: dict[str, object] = {
     "rates": {},
     "updated_at": None,
 }
