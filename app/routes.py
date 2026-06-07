@@ -226,6 +226,16 @@ def faq():
     return render_template("faq.html", faq=FAQ)
 
 
+@main_bp.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+
+@main_bp.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
 # ---------------------------------------------------------------------------
 # Guides (SEO content pages)
 # ---------------------------------------------------------------------------

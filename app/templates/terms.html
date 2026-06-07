@@ -1,0 +1,130 @@
+{% extends "legal_base.html" %}
+
+{% block title %}Terms of Service — {{ app_name }}{% endblock %}
+{% block heading %}Terms of Service{% endblock %}
+{% block subheading %}Last updated: <span class="placeholder">[date of publication]</span>{% endblock %}
+
+{% block content %}
+<p>
+  These Terms of Service ("<strong>Terms</strong>") govern your access to and use of
+  {{ app_name }} (the "<strong>Service</strong>"), provided by
+  <strong>Flight Monitor Pty Ltd</strong>
+  (ABN <span class="placeholder">[pending registration]</span>, "<strong>we</strong>",
+  "<strong>us</strong>", "<strong>our</strong>"), a company incorporated in Australia.
+  By creating an account or otherwise using the Service, you agree to be bound by these Terms.
+</p>
+
+<h2>1. What {{ app_name }} does</h2>
+<p>
+  {{ app_name }} is a flight price-monitoring and alert service. You tell us which routes
+  you're interested in, and we track airfare prices on those routes and notify you when,
+  based on that route's own price history, a fare looks genuinely low — not merely lower
+  than it was yesterday. {{ app_name }} is <strong>not</strong> a travel agency, booking
+  service, or ticket seller. We do not sell flights, process travel bookings, or act as an
+  intermediary between you and any airline or travel provider.
+</p>
+
+<h2>2. Accounts</h2>
+<ul>
+  <li>You must provide accurate registration information and keep your password secure.</li>
+  <li>By subscribing to a paid plan, you confirm that you have the legal capacity to enter into this agreement.</li>
+  <li>Accounts are personal to you. New registrations are currently invite-only or via a free trial; we may change this at our discretion.</li>
+  <li>You're responsible for all activity that occurs under your account.</li>
+</ul>
+
+<h2>3. Subscriptions, trials and billing</h2>
+<ul>
+  <li>New self-registered accounts receive a 14-day free trial. Invited accounts may receive ongoing access at a tier we specify.</li>
+  <li>Paid subscriptions (Explorer and Traveller tiers) are billed monthly or annually in advance through our payment processor. Current pricing is shown on our pricing page and may change with reasonable notice to existing subscribers.</li>
+  <li>You can cancel at any time from your account settings. Monthly subscriptions continue until the end of the current billing month; annual subscriptions continue until the end of the current annual period; trial cancellations take effect immediately. We don't provide pro-rata refunds for early cancellation, except where required by law.</li>
+  <li>Nothing in these Terms excludes, restricts or modifies any consumer guarantee, right or remedy you have under the Australian Consumer Law that cannot lawfully be excluded.</li>
+</ul>
+
+<h2>4. Acceptable use</h2>
+<p>You agree not to:</p>
+<ul>
+  <li>use the Service for any unlawful purpose, or to scrape, reverse-engineer, or systematically extract data from it;</li>
+  <li>share your account or alert access beyond the recipients your subscription tier permits;</li>
+  <li>attempt to interfere with, overload, or gain unauthorised access to the Service or its infrastructure;</li>
+  <li>resell, sublicense, or commercially redistribute any part of the Service or the data it provides.</li>
+</ul>
+<p>We may suspend or terminate accounts that breach this section.</p>
+
+<h2>5. Flight price information — please read this carefully</h2>
+<p>
+  Flight and price information shown in {{ app_name }} is sourced from third-party data
+  providers and is <strong>indicative only</strong>. Prices, availability, schedules and
+  fare conditions change constantly and may differ — sometimes significantly — from what
+  is shown by the time you check directly with an airline or booking site.
+  <strong>Always verify the current price, availability and conditions directly with the
+  airline or booking provider before making any purchase decision.</strong> We are not
+  responsible for any loss arising from reliance on price information shown in the
+  Service, and we make no guarantee that any fare we display will still be available, or
+  available at the price shown.
+</p>
+
+<h2>6. Third-party services and links</h2>
+<p>
+  The Service relies on third-party providers for flight data, currency conversion, email
+  delivery and payment processing, and may link to airline or travel-booking websites. We
+  don't control these third parties and aren't responsible for their content, accuracy,
+  availability, or terms. Your use of any third-party site or service is governed by that
+  provider's own terms and policies.
+</p>
+
+<h2>7. Intellectual property</h2>
+<p>
+  The Service, including its design, software, branding and original content, is owned by
+  us or our licensors and is protected by copyright and other laws. You may not copy,
+  modify, reproduce or create derivative works from any part of the Service except as
+  necessary for your personal, non-commercial use of it.
+</p>
+
+<h2>8. Availability and changes to the Service</h2>
+<p>
+  We aim to keep the Service reliable and continuously improving, but we don't guarantee
+  uninterrupted availability. We may add, change, suspend or discontinue features
+  (including data sources, alert logic, or pricing) at any time, and will give subscribers
+  reasonable notice of changes that materially reduce the Service's functionality.
+</p>
+
+<h2>9. Limitation of liability</h2>
+<p>
+  To the maximum extent permitted by law, and subject to any consumer guarantees that
+  cannot be excluded under the Australian Consumer Law:
+</p>
+<ul>
+  <li>the Service is provided "as is" without warranties of any kind, express or implied;</li>
+  <li>we are not liable for indirect, consequential, or special loss (including lost savings, missed fares, or lost opportunities) arising from your use of, or inability to use, the Service;</li>
+  <li>our total liability to you for any claim arising from these Terms or the Service is limited to the amount you paid us in the 12 months before the event giving rise to the claim.</li>
+</ul>
+
+<h2>10. Termination</h2>
+<p>
+  You may stop using the Service and cancel your subscription at any time (see section 3).
+  We may suspend or terminate your account if you breach these Terms, or close the Service
+  to you with reasonable notice for any other reason. On termination, your data is
+  retained and then deleted in accordance with our Privacy Policy.
+</p>
+
+<h2>11. Governing law</h2>
+<p>
+  These Terms are governed by the laws of New South Wales, Australia, and you submit to
+  the non-exclusive jurisdiction of its courts.
+</p>
+
+<h2>12. Changes to these Terms</h2>
+<p>
+  We may update these Terms from time to time. We'll post the updated version here with a
+  new "last updated" date, and notify subscribers of any material changes by email before
+  they take effect.
+</p>
+
+<h2>13. Contact us</h2>
+<p>
+  Flight Monitor Pty Ltd<br>
+  ABN: <span class="placeholder">[pending registration]</span><br>
+  Registered office: <span class="placeholder">[pending registration]</span><br>
+  Email: <span class="placeholder">[support address — pending domain registration]</span>
+</p>
+{% endblock %}
